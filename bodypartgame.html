@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .word-display {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .choice-button {
+            padding: 15px;
+            font-size: 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .choice-button:hover {
+            background-color: #357abd;
+        }
+
+        .choice-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .score {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .feedback {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .feedback.correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+
+        .feedback.incorrect {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+
+        .nav-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #45a049;
+        }
+
+        @media (max-width: 600px) {
+            .choices {
+                grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="game.html" class="nav-button">Back</a>
+        </div>
+        <h5>Play Nuer-English Body Parts Game</h5>
+        <div class="score">Score: <span id="scoreDisplay">0</span> | Wrong: <span id="wrongDisplay">0</span></div>
+        <div class="word-display" id="wordToTranslate"></div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"></div>
+        <button onclick="nextWord()" class="nav-button" id="nextButton" style="display: none;">Next Word</button>
+        <button onclick="restartGame()" class="nav-button" id="restartButton" style="display: none;">Restart Game</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let wrongCount = 0;
+        let totalQuestions = 20;
+        let questionsAsked = 0;
+        let currentWord = null;
+
+        const vocabulary =   [
+    { en: "Head", nr: "Wi̱c" },
+    { en: "Brain", nr: "ŋi̱ɛth" },
+    
+    { en: "Hair", nr: "Miëm" },
+    { en: "Forehead", nr: "nhiam kaan" },
+    { en: "Face", nr: "Nhiam" },
+    { en: "Eye", nr: "Waŋ" },
+    { en: "Eyebrow", nr: "Miëm Waŋ" },
+    { en: "Eyelid", nr: "Miëm Waŋ tin te piny" },
+    { en: "Nose", nr: "Wum" },
+    { en: "Cheek", nr: "Jio̱m" },
+    { en: "Mouth", nr: "Thok" },
+    { en: "Lip", nr: "Thok piɛny" },
+    { en: "Chin", nr: "Tik" },
+    { en: "Jaw", nr: "Jio̱m ki̱ɛ̱ gak" },
+    { en: "Ear", nr: "Jith" },
+    
+    { en: "Neck", nr: "ŋuäk" },
+    { en: "Chest", nr: "Kaw" },
+    { en: "Breast", nr: "thin" },
+    { en: "Rib", nr: "nyiet" },
+   
+    { en: "Stomach", nr: "Jiɛc" },
+    { en: "Waist", nr: "Lɛ̱t ki̱ɛ̱ ho̱y" },
+	{ en: "Back", nr: "Jɔk" },
+   
+    { en: "Shoulder", nr: "wuɔk" },
+    { en: "Arm", nr: "Tet in te nhial" },
+    { en: "Elbow", nr: "Ciāl" },
+   
+    { en: "Wrist", nr: "Kuɔ̱̱r tetkä" },
+    { en: "Hand", nr: "Tet" },
+    { en: "Finger", nr: "Yat" },
+    { en: "Thumb", nr: "Yat in but but" },
+    { en: "Leg", nr: "Ciök" },
+    { en: "Hip", nr: "lɛt" },
+    { en: "Thigh", nr: "Ɣäm" },
+    { en: "Knee", nr: "Muɔ̱l" },
+   
+    
+    { en: "Foot", nr: "cio̱k piɛny" },
+    { en: "Toe", nr: "Yiat ciökä" },
+    { en: "Heart", nr: "Lɔc" },
+    { en: "Lungs", nr: "Puɔ̱ɔ̱th" },
+    { en: "Liver", nr: "Cuëny" },
+    { en: "Kidneys", nr: "ruok" },
+    { en: "Intestines", nr: "cin" },
+    { en: "Bladder", nr: "Lip" },
+    
+    
+	];
+        function nextWord() {
+            if (questionsAsked >= totalQuestions) {
+                endGame();
+                return;
+            }
+
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+
+            currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            const languages = ['en', 'nr'];
+            const sourceLang = languages[Math.floor(Math.random() * languages.length)];
+            const targetLang = languages.filter(lang => lang !== sourceLang)[0];
+
+            document.getElementById('wordToTranslate').textContent = currentWord[sourceLang];
+
+            const choices = [currentWord[targetLang]];
+            while (choices.length < 4) {
+                const randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+                if (randomWord[targetLang] !== currentWord[targetLang] && !choices.includes(randomWord[targetLang])) {
+                    choices.push(randomWord[targetLang]);
+                }
+            }
+
+            choices.sort(() => Math.random() - 0.5);
+
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice;
+                button.onclick = () => checkAnswer(choice, currentWord[targetLang]);
+                choicesContainer.appendChild(button);
+            });
+
+            questionsAsked++;
+        }
+
+        function checkAnswer(selected, correct) {
+            const feedback = document.getElementById('feedback');
+            if (selected === correct) {
+                score++;
+                feedback.textContent = 'Correct!';
+                feedback.className = 'feedback correct';
+            } else {
+                wrongCount++;
+                feedback.textContent = `Incorrect. The correct answer was: ${correct}`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('wrongDisplay').textContent = wrongCount;
+
+            document.querySelectorAll('.choice-button').forEach(button => {
+                button.disabled = true;
+            });
+
+            if (questionsAsked < totalQuestions) {
+                document.getElementById('nextButton').style.display = 'inline-block';
+            } else {
+                setTimeout(endGame, 2000);
+            }
+        }
+
+        function endGame() {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `Game Over! Your score: ${score} / ${totalQuestions} | Wrong answers: ${wrongCount}`;
+            feedback.className = 'feedback';
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('restartButton').style.display = 'inline-block';
+        }
+
+        function restartGame() {
+            score = 0;
+            wrongCount = 0;
+            questionsAsked = 0;
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('wrongDisplay').textContent = wrongCount;
+            document.getElementById('restartButton').style.display = 'none';
+            nextWord();
+        }
+
+        // Start the game when the page loads
+        window.onload = nextWord;
+    </script>
+</body>
+</html>

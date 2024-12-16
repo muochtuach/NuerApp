@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary</title>
+    <style>
+        :root {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --header-color: #007bff;
+            --entry-background: #ffffff;
+            --entry-border: #ced4da;
+            --entry-hover: #f8f9fa;
+            --amharic-color: #d63384;
+            --nuer-color: #17a2b8;
+        }
+
+        [data-theme='dark'] {
+            --background-color: #1a1a1a;
+            --text-color: #f4f4f4;
+            --header-color: #66b3ff;
+            --entry-background: #2a2a2a;
+            --entry-border: #444;
+            --entry-hover: #3a3a3a;
+            --amharic-color: #ff79c6;
+            --nuer-color: #1abc9c;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--header-color);
+        }
+        #search {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid var(--header-color);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        #search:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+        #dictionary {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--entry-border);
+            border-radius: 4px;
+            background: var(--entry-background);
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .entry {
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid var(--entry-border);
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            background-color: var(--entry-background);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .entry:hover {
+            background-color: var(--entry-hover);
+        }
+        .entry h2 {
+            margin: 0;
+            font-size: 1.5em;
+            color: var(--header-color);
+        }
+        .entry p {
+            margin: 5px 0;
+            font-size: 17px;
+        }
+        .entry strong {
+            color: var(--text-color);
+        }
+        .amharic {
+            color: var(--amharic-color);
+            
+			
+        }
+        .nuer {
+            color: var(--nuer-color);
+            font-weight: bold;
+        }
+        .pronunciation {
+            display: inline-block;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .nav-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-button {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background-color: #D9534F;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 1.1em;
+        }
+        .nav-button:hover {
+            background-color: red;
+            transform: red;
+        }
+        .toggle-button {
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px 15px;
+            background-color: var(--header-color);
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .toggle-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body data-theme="light">
+<div class="container">
+    <div class="nav-container">
+        <a href="index.html" class="nav-button">Back</a>
+    </div>
+
+    <h2>Nuer, Amharic and English Dictionary</h2>
+    <button class="toggle-button" onclick="toggleTheme()">Gɛr buaydɛ</button>
+    <input type="text" id="search" placeholder="Search for a word in English, Amharic, or Nuer..." oninput="filterEntries()">
+
+    <div id="dictionary"></div>
+</div>
+
+<script>
+    const entries = [
+        { en: "abandon", am: "መተው = metewi", nr: "bäny pi̱ny", definition: "To give up completely (a course of action, a practice, etc.).", example: "They had to abandon their plans due to the bad weather.", pronunciation: "C:\Users\Yimam\Desktop\test app\audio\2024-12-01 12-57-10.mp3" },
+        { en: "ability", am: "ችሎታ = chilota", nr: "lua̱ŋ", definition: "The capacity to do something, especially the physical, mental, or legal power to perform a task.", example: "Her ability to solve complex problems impressed everyone.", pronunciation: "audio/ability.mp3" },
+        { en: "able", am: "የሚችል = yemīchili", nr: "lua̱̱ŋ", definition: "Having the power, skill, means, or opportunity to do something.", example: "She is able to finish the project ahead of schedule.", pronunciation: "audio/able.mp3" },
+        { en: "abortion", am: "ፅንስ ማስወረድ = t͟s’inisi masiweredi", nr: "wuɔ̱c gatdä", definition: "The termination of a pregnancy by the removal or expulsion of a fetus or embryo.", example: "The debate over abortion rights continues to be a controversial issue.", pronunciation: "audio/abortion.mp3" },
+        { en: "about", am: "ስለ = sile", nr: "kɛ kui̱ kä", definition: "On the subject of; concerning.", example: "We talked about our plans for the weekend.", pronunciation: "audio/about.mp3" },
+        { en: "above", am: "በላይ = belayi", nr: "mi te nhial", definition: "At a higher level or layer than.", example: "The temperature was above average this summer.", pronunciation: "audio/above.mp3" },
+		{ en: "abroad", am: "ውጭ አገር = wich’i āgeri", nr: "ro̱l juri", definition: "In or to a foreign country or countries.", example: "She studied abroad for a year in France." },
+{ en: "absence", am: "አለመኖር = ālemenori", nr: "pa̱k", definition: "The state of being away from a place or person.", example: "His absence from the meeting was noted by everyone." },
+{ en: "absolutely", am: "በፍጹም = befits’umi", nr: "kɛ thuɔ̱k kɛli̱w", definition: "With no qualification, restriction, or limitation; totally.", example: "I absolutely agree with your opinion." },
+{ en: "absorb", am: "መምጠጥ = memit’et’i", nr: "na̱̱ŋ rɛy", definition: "To take in or soak up (energy, or a liquid or other substance) by chemical or physical action.", example: "Plants absorb sunlight to produce energy." },
+{ en: "abuse", am: "አላግባብ መጠቀም = ālagibabi met’ek’emi", nr: "kuëth", definition: "To use something to bad effect or for a bad purpose; misuse.", example: "It is important to avoid the abuse of power." },
+{ en: "academic", am: "የትምህርት = yetimihiriti", nr: "mi naŋrɔ kɛ gɔ̱a̱r", definition: "Relating to education and scholarship.", example: "She received several academic awards for her achievements." },
+{ en: "accept", am: "ተቀበል = tek’ebeli", nr: "mi nhɔki", definition: "To consent to receive or undertake something offered.", example: "He decided to accept the job offer." },
+{ en: "access", am: "መዳረሻ = medaresha", nr: "mi jëki", definition: "The means or opportunity to approach or enter a place.", example: "You need a key to access the building after hours." },
+{ en: "accident", am: "አደጋ = ādega", nr: "riɛ̱k", definition: "An unfortunate incident that happens unexpectedly and unintentionally.", example: "The accident on the highway caused a major traffic jam." },
+{ en: "accompany", am: "ማጀብ = majebi", nr: "mi guri ran", definition: "To go somewhere with someone as a companion.", example: "I will accompany you to the doctor’s appointment." },
+{ en: "accomplish", am: "ማከናወን = makenaweni", nr: "thuɔ̱k kɛ mal", definition: "To achieve or complete successfully.", example: "They worked hard to accomplish their goals." },
+{ en: "according", am: "መሠረት = mešereti", nr: "kɛ̱ ta̱a̱ in tëë kɛ", definition: "As stated by or in.", example: "According to the report, the economy is improving." },
+{ en: "account", am: "መለያ = meleya", nr: "gua̱̱th tɔwä, kiɛ mi lati duɔ̱r", definition: "A report or description of an event or experience.", example: "She gave a detailed account of her travels." },
+{ en: "accurate", am: "ትክክለኛ = tikikilenya", nr: "niɛ gua̱thdɛ", definition: "Free from error, as in accuracy.", example: "The data provided was accurate and reliable." },
+{ en: "accuse", am: "መክሰስ = mekisesi", nr: "kuëth", definition: "To claim that someone has done something illegal or wrong.", example: "They were quick to accuse him of dishonesty." },
+{ en: "achieve", am: "ማሳካት = masakati", nr: "luäŋ kɛ jëk", definition: "To successfully reach a desired objective or result.", example: "She worked hard to achieve her dream of becoming a doctor." },
+{ en: "achievement", am: "ስኬት = sikēti", nr: "mi ca̱ luäŋ kɛ lätni", definition: "A thing done successfully, typically by effort, courage, or skill.", example: "Graduating from university was her greatest achievement." },
+{ en: "acknowledge", am: "እውቅና መስጠት = iwik’ina mesit’eti", nr: "mi ci nhɔk", definition: "To accept or admit the existence or truth of something.", example: "She did not acknowledge her mistake during the meeting." },
+{ en: "acquire", am: "ማግኘት = maginyeti", nr: "mi ci jëk", definition: "To obtain or begin to have something.", example: "He hopes to acquire new skills through training." },
+{ en: "across", am: "በመላ = bemela", nr: " wä kui̱y", definition: "From one side to the other side of something.", example: "They walked across the street to get to the park." },
+{ en: "act", am: "ተግባር = tegibari", nr: "la̱̱t", definition: "To take action; do something.", example: "It is important to act quickly in emergencies." },
+{ en: "action", am: "ድርጊት = dirigīti", nr: "la̱t mi la̱tkɛ", definition: "The fact or process of doing something, typically to achieve an aim.", example: "The charity is taking action to help those in need." },
+{ en: "active", am: "ንቁ = nik’u", nr: "mi lät", definition: "Engaging or ready to engage in physically energetic pursuits.", example: "She leads an active lifestyle by going to the gym regularly." },
+{ en: "activist", am: "አክቲቪስት = ākitīvīsiti", nr: "ram min la̱t", definition: "A person who campaigns for some kind of social change.", example: "The activist organized a rally to raise awareness about climate change." },
+{ en: "activity", am: "እንቅስቃሴ = inik’isik’asē", nr: "la̱t", definition: "A condition in which things are happening or being done.", example: "The children were engaged in various activities at the summer camp." },
+{ en: "actor", am: "ተዋናይ = tewanayi", nr: "ra̱m mi lät duɔr", definition: "A person whose profession is acting on the stage, in movies, or on television.", example: "The actor received an award for his outstanding performance." },
+{ en: "actress", am: "ተዋናይት = tewanayiti", nr: "ciek mi läät vidio ni", definition: "A female actor.", example: "The actress starred in several blockbuster films." },
+{ en: "actual", am: "ትክክለኛ = tikikilenya", nr: "min mɔ jɛn", definition: "Existing in fact; real.", example: "The actual cost of the project was much higher than expected." },
+{ en: "actually", am: "በእውነት = be’iwineti", nr: "kɛ ta̱a̱ ɛmɔ", definition: "As the truth or facts of a situation; really.", example: "I thought she was joking, but she was actually serious." },
+{ en: "ad", am: "ማስታወቂያ = masitawek’īya", nr: "mi lär kɛ nɛy dial", definition: "A notice or announcement in a public medium promoting a product, service, or event.", example: "I saw an ad for a new restaurant in the newspaper." },
+{ en: "adapt", am: "መላመድ = melamedi", nr: "ŋiɛc kä duɔ̱r", definition: "To adjust or modify to fit a new condition or environment.", example: "Animals adapt to their surroundings for survival." },
+{ en: "add", am: "ጨምር = ch’emiri", nr: "ma̱t", definition: "To join something to something else so as to increase the size, number, or amount.", example: "Please add your name to the list of attendees." },
+{ en: "addition", am: "መደመር = medemeri", nr: "mat kɛ", definition: "The process of adding something to something else.", example: "In addition to her job, she volunteers at a local charity." },
+{ en: "additional", am: "ተጨማሪ = tech’emarī", nr: "mätni", definition: "Added or extra.", example: "The company provided additional training for its employees." },
+{ en: "address", am: "አድራሻ = ādirasha", nr: "gua̱th ciɛŋä", definition: "The particulars of the place where someone lives or an organization is situated.", example: "Please provide your address for the shipping label." },
+{ en: "adequate", am: "በቂ = bek’ī", nr: "mi ro̱ŋ", definition: "Satisfactory or acceptable in quality or quantity.", example: "The supply of food was adequate for the guests." },
+{ en: "adjust", am: "ማስተካከል = masitekakeli", nr: "riali̱ kä", definition: "To alter or move something slightly in order to achieve the desired fit, appearance, or result.", example: "You may need to adjust the seat for better comfort." },
+{ en: "adjustment", am: "ማስተካከል = masitekakeli", nr: "riali̱dɛ i̱kä", definition: "A small alteration or movement made to achieve the desired fit, appearance, or result.", example: "The adjustment of the thermostat improved the temperature in the room." },
+{ en: "administration", am: "አስተዳደር = āsitedaderi", nr: "tää ruecä ", definition: "The process or activity of running a business, organization, etc.", example: "The administration of the school has implemented new policies." },
+{ en: "administrator", am: "አስተዳዳሪ = āsitedadarī", nr: "kuär", definition: "A person responsible for running a business, organization, etc.", example: "The administrator oversees the daily operations of the office." },
+{ en: "admire", am: "አደንቃለሁ = ādenik’alehu", nr: "mi nhɔ̱ki", definition: "To regard with respect or warm approval.", example: "I admire her dedication to her work." },
+{ en: "admission", am: "መግቢያ = megibīya", nr: "mi nhok ji we kä duɔ̱r", definition: "The process of entering or being allowed to enter a place, organization, or institution.", example: "Admission to the concert is free for children under 12." },
+{ en: "admit", am: "መቀበል = mek’ebeli", nr: "nhɔ̱kɛ we", definition: "To allow someone to enter; to confess or acknowledge.", example: "She decided to admit her mistake." },
+{ en: "adolescent", am: "ጉርምስና = gurimisina", nr: "ŋuɛtni", definition: "A young person in the transitional stage from childhood to adulthood.", example: "The adolescent years can be challenging for many." },
+{ en: "adopt", am: "ማደጎ = madego", nr: "na̱ŋ ala dunŋdu", definition: "To take up or start to use or follow; to take in a child as one's own.", example: "They decided to adopt a child from the orphanage." },
+{ en: "adult", am: "አዋቂ = āwak’ī", nr: "ram mi di̱it", definition: "A person who is fully grown or developed.", example: "As an adult, he took responsibility for his actions." },
+{ en: "advance", am: "በቅድሚያ = bek’idimīya", nr: "mi wi kɛ we nhiam", definition: "To move forward in a purposeful way; to make progress.", example: "The company plans to advance its technology this year." },
+{ en: "advanced", am: "የላቀ = yelak’e", nr: "mi tëë nhia̱m", definition: "Far on or ahead in development or progress.", example: "She took an advanced course in mathematics." },
+{ en: "advantage", am: "ጥቅም = t’ik’imi", nr: "min gɔa̱ thin", definition: "A condition or circumstance that puts one in a favorable or superior position.", example: "Having a good education is an advantage in the job market." },
+{ en: "adventure", am: "ጀብዱ = jebidu", nr: "nen kä mi kuici ni wen", definition: "An unusual and exciting experience or activity.", example: "They went on an adventure to the mountains." },
+{ en: "advertising", am: "ማስታወቂያ = masitawek’īya", nr: "jak kä ŋa̱ckɛ", definition: "The activity or profession of producing advertisements for commercial products or services.", example: "Advertising plays a crucial role in business success." },
+{ en: "advice", am: "ምክር = mikiri", nr: "luek", definition: "Guidance or recommendations concerning prudent future action.", example: "She sought his advice on the matter." },
+{ en: "advise", am: "መምከር = memikeri", nr: "luek", definition: "To offer suggestions about the best course of action.", example: "He will advise you on how to proceed." },
+{ en: "adviser", am: "አማካሪ = āmakarī", nr: "ram min la luek", definition: "A person who gives advice, typically someone in a position of authority.", example: "She works as a financial adviser." },
+{ en: "advocate", am: "ጠበቃ = t’ebek’a", nr: "cuɔŋ kɛ kui̱ ra̱n", definition: "A person who publicly supports or recommends a particular cause or policy.", example: "She is an advocate for environmental protection." },
+{ en: "affair", am: "ጉዳይ = gudayi", nr: "mi ci ŋuani tuɔ̱k", definition: "An event or sequence of events of a specified kind.", example: "The affair was widely reported in the media."},
+
+{ en: "affect", am: "ተጽዕኖ = tets’i‘ino", nr: "mi gɛr duɔ̱r ", definition: "To have an effect on; make a change.", example: "The weather can affect your mood."},
+
+{ en: "afford", am: "አቅም = āk’imi", nr: "mi dëë luäŋ", definition: "To have enough money to pay for something.", example: "I can't afford to buy a new car right now."},
+
+{ en: "afraid", am: "መፍራት = mefirati", nr: "dual", definition: "Feeling fear or anxiety; frightened.", example: "She was afraid of the dark."},
+
+
+
+{ en: "after", am: "በኋላ = beḫwala", nr: "kɛ kɔrɛ", definition: "In the time following an event or another period of time.", example: "We can meet after lunch."},
+
+{ en: "afternoon", am: "ከሰአት = kese’āti", nr: "cäŋdär", definition: "The time of day from noon to evening.", example: "Let’s meet in the afternoon."},
+
+{ en: "again", am: "እንደገና = inidegena", nr: "ɛ nyɔk", definition: "Once more; another time.", example: "She tried again to solve the puzzle."},
+
+{ en: "against", am: "መቃወም = mek’awemi", nr: "kɛ lo̱̱kä", definition: "In opposition to.", example: "They voted against the proposal."},
+
+{ en: "age", am: "ዕድሜ = ‘idimē", nr: "run diëth", definition: "The length of time that a person has lived or a thing has existed.", example: "He is of a young age."},
+
+{ en: "agency", am: "ኤጀንሲ = ējenisī", nr: "mi ba naath lua̱k thin", definition: "A business or organization established to provide a particular service.", example: "She works for a travel agency."},
+
+{ en: "agenda", am: "አጀንዳ = ājenida", nr: "tin ba lat", definition: "A list of items to be discussed at a meeting.", example: "The agenda for the meeting was distributed in advance."},
+
+{ en: "agent", am: "ወኪል = wekīli", nr: "ra̱m mi cuŋ kɛ kui̱ nɛɛni kiɛ duɔ̱r", definition: "A person who acts on behalf of another person or group.", example: "The agent helped negotiate the contract."},
+
+{ en: "aggressive", am: "ጠበኛ = t’ebenya", nr: "ŋɛ̱ɛ̱ny", definition: "Ready or likely to attack or confront; characterized by aggression.", example: "The aggressive dog barked loudly at strangers."},
+
+{ en: "ago", am: "በፊት = befīti", nr: "mëë ci wä", definition: "Used to indicate the time in the past.", example: "I saw him two days ago."},
+
+{ en: "agree", am: "እስማማለሁ = isimamalehu", nr: "mi ci nhɔk", definition: "To have the same opinion; to consent.", example: "We all agree on the decision made."},
+
+{ en: "agreement", am: "ስምምነት = simimineti", nr: "mi ca ma̱t pi̱ny", definition: "A mutual arrangement, usually written, between parties.", example: "They signed an agreement to collaborate on the project."},
+
+{ en: "agriculture", am: "ግብርና = gibirina", nr: "pieth dɛy wal", definition: "Relating to agriculture, farming, or the cultivation of land.", example: "The agricultural sector is vital for the economy."},
+
+{ en: "ah", am: "አህ = āhi", nr: "ah", definition: "An expression of surprise or realization.", example: "Ah! I see what you mean now."},
+
+{ en: "ahead", am: "ወደፊት = wedefīti", nr: "nhiam", definition: "In or toward the front; in advance.", example: "We need to plan ahead for the event."},
+
+{ en: "aid", am: "እርዳታ = iridata", nr: "luäk", definition: "Help or support, especially of a practical nature.", example: "The organization provides aid to those in need."},
+
+{ en: "aide", am: "ረዳት = redati", nr: "luääk", definition: "A person who acts as an assistant to someone in authority.", example: "The senator’s aide took notes during the meeting."},
+
+{ en: "AIDS", am: "ኤድስ = ēdisi", nr: "AIDS", definition: "A disease caused by the human immunodeficiency virus (HIV).", example: "Awareness of AIDS has increased in recent years."},
+
+{ en: "aim", am: "አላማ = ālama", nr: "min go̱r kɛ̱", definition: "To intend or direct a goal; a purpose or intention.", example: "Her aim is to become a doctor."},
+
+{ en: "air", am: "አየር = āyeri", nr: "jiɔ̱m", definition: "The invisible mixture of gases that surrounds the Earth.", example: "The air is fresh in the mountains."},
+
+{ en: "aircraft", am: "አውሮፕላን = āwiropilani", nr: "ria̱th nhiali̱", definition: "A vehicle capable of flight, such as an airplane or helicopter.", example: "The aircraft landed smoothly on the runway."},
+
+{ en: "airline", am: "አየር መንገድ = āyeri menigedi", nr: "ria̱th nhiali̱", definition: "A company that provides air transport services for passengers or cargo.", example: "She booked a flight with a major airline."},
+
+{ en: "airport", am: "አየር ማረፊያ = āyeri marefīya", nr: "gua̱th nyurä tayari", definition: "A place where aircraft land and take off, with facilities for passengers.", example: "The airport was busy with travelers."},
+
+{ en: "album", am: "አልበም = ālibemi", nr: "guäth thuṟɛ ni kiɛ diit ", definition: "A collection of audio recordings or photographs.", example: "She released a new album last month."},
+
+{ en: "alcohol", am: "አልኮል = ālikoli", nr: "kɔa̱ŋ", definition: "A chemical substance that can cause intoxication; often found in beverages.", example: "He decided to avoid alcohol for health reasons."},
+
+{ en: "alive", am: "በሕይወት = beḥiyiweti", nr: "te̱kä", definition: "Living; not dead.", example: "She is still alive after the accident."},
+
+{ en: "all", am: "ሁሉም = hulumi", nr: "kɛn dial", definition: "The whole quantity; every one or everything.", example: "All students must submit their assignments."},
+
+{ en: "alliance", am: "ህብረት = hibireti", nr: "mat", definition: "A union or association formed for mutual benefit.", example: "The two countries formed an alliance for trade."},
+
+{ en: "allow", am: "ፍቀድ = fik’edi", nr: "nho̱̱k tuɔ̱k", definition: "To let someone do something; to permit.", example: "The teacher will allow extra time for the test."},
+
+{ en: "ally", am: "አጋር = āgari", nr: "määth", definition: "A person or group that cooperates with another for a common purpose.", example: "They became allies in the fight for justice."},
+
+{ en: "almost", am: "ማለት ይቻላል = maleti yichalali", nr: "thia̱k", definition: "Very nearly but not quite; almost.", example: "I almost finished my project on time."},
+
+{ en: "alone", am: "ብቻውን = bichawini", nr: "kärɔa̱", definition: "Without anyone or anything else; by oneself.", example: "She prefers to work alone."},
+
+{ en: "along", am: "አብሮ = ābiro", nr: "kɛl kɛ", definition: "Moving in a constant direction on (a path or any surface).", example: "We walked along the riverbank."},
+
+{ en: "already", am: "አስቀድሞ = āsik’edimo", nr: "cɛ thuok ni wen", definition: "Before the time in question; previously.", example: "They have already left for the airport."},
+
+{ en: "also", am: "እንዲሁም = inidīhumi", nr: "bä", definition: "In addition; too.", example: "She likes ice cream and also enjoys cake."},
+
+{ en: "alter", am: "መቀየር = mek’eyeri", nr: "mi gɛri", definition: "To change or modify something.", example: "You can alter the settings in the app."},
+
+{ en: "alternative", am: "አማራጭ = āmarach’i", nr: "min dɔŋ", definition: "One of two or more available possibilities.", example: "We need to find an alternative route."},
+
+{ en: "although", am: "ቢሆንም = bīhonimi", nr: "a cäŋ", definition: "In spite of the fact that; even though.", example: "Although it was raining, we went for a walk."},
+
+{ en: "always", am: "ሁልጊዜ = huligīzē", nr: "ni ciaŋ", definition: "At all times; on every occasion.", example: "She always arrives early to meetings."},
+
+{ en: "AM", am: "ኤም = ēmi", nr: "AM", definition: "Ante meridiem; before midday.", example: "The meeting is scheduled for 10 AM."},
+
+{ en: "amazing", am: "አስደናቂ = āsidenak’ī", nr: "mi gääy naath", definition: "Causing great surprise or wonder; astonishing.", example: "The view from the top of the mountain is amazing."},
+
+
+{ en: "among", am: "መካከል = mekakeli", nr: "rɛy kä", definition: "In the middle of; surrounded by.", example: "She felt comfortable among her friends."},
+
+{ en: "amount", am: "መጠን = met’eni", nr: "pëk duɔ̱rä", definition: "A quantity of something.", example: "The amount of water in the bottle is low."},
+
+{ en: "analysis", am: "ትንተና = tinitena", nr: "go̱r ŋäcä", definition: "A detailed examination of the elements or structure of something.", example: "The analysis of the data revealed important trends."},
+
+{ en: "analyst", am: "ተንታኝ = tenitanyi", nr: "ran min go̱r ŋäc", definition: "A person who analyzes data or information.", example: "The analyst presented her findings at the conference."},
+
+
+{ en: "ancient", am: "ጥንታዊ = t’initawī", nr: "tëë wal", definition: "Belonging to the very distant past; extremely old.", example: "The ancient ruins attract many tourists."},
+
+{ en: "and", am: "እና = ina", nr: "kɛ̱nɛ̱", definition: "Used to connect words of the same part of speech, clauses, or sentences.", example: "She likes tea and coffee."},
+
+{ en: "anger", am: "ቁጣ = k’ut’a", nr: "ŋɛ̱ɛ̱ny", definition: "A strong feeling of annoyance, displeasure, or hostility.", example: "His anger was evident when he found out."},
+
+{ en: "angle", am: "አንግል = ānigili", nr: "gɔŋä", definition: "The figure formed by two rays, called the sides of the angle, sharing a common endpoint.", example: "The angle of the triangle is acute."},
+
+{ en: "angry", am: "ተናደደ = tenadede", nr: "gak", definition: "Feeling or showing strong annoyance, displeasure, or hostility.", example: "She was angry about the misunderstanding."},
+
+{ en: "animal", am: "እንስሳ = inisisa", nr: "le̱y", definition: "A living organism that is not a plant; typically able to move and respond to stimuli.", example: "The zoo has many different animals."},
+
+{ en: "anniversary", am: "አመታዊ በአል = āmetawī be’āli", nr: "tiɛ̱m ca̱ŋ", definition: "The date on which an event took place in a previous year.", example: "They celebrated their wedding anniversary."},
+
+{ en: "announce", am: "አስታወቀ = āsitawek’e", nr: "mi lar kɛ duɔ̱r", definition: "To make a public or formal declaration about something.", example: "They will announce the results tomorrow."},
+
+{ en: "annual", am: "ዓመታዊ = ‘ametawī", nr: "kä kɛl kɛ ruɔ̱n", definition: "Occurring once every year.", example: "The annual festival attracts many visitors."},
+
+{ en: "another", am: "ሌላ = lēla", nr: "mi dɔŋ", definition: "One more; an additional one.", example: "Can I have another piece of cake?"},
+
+{ en: "answer", am: "መልስ = melisi", nr: "luɔ̱c", definition: "A response to a question or a solution to a problem.", example: "Please provide an answer to the question."},
+
+{ en: "anticipate", am: "መገመት = megemeti", nr: "mi ma̱rkɛ", definition: "To expect or predict something will happen.", example: "We anticipate a lot of traffic tomorrow."},
+
+{ en: "anxiety", am: "ጭንቀት = ch’inik’eti", nr: "diɛ̱r lɔa̱c", definition: "A feeling of worry, nervousness, or unease about something.", example: "She felt anxiety before the exam."},
+
+{ en: "any", am: "ማንኛውም = maninyawimi", nr: "ɛ ni ", definition: "Used to refer to one or some of a thing or number of things, no matter how much or how many.", example: "Do you have any questions?"},
+
+{ en: "anybody", am: "ማንም = manimi", nr: "ɛni̱ ran", definition: "Any person; anyone.", example: "Is anybody home?"},
+
+{ en: "anymore", am: "ከእንግዲህ = ke’inigidīhi", nr: "ɛwe nhiam", definition: "At the present or in the future; any longer.", example: "I don’t live there anymore."},
+{ en: "anyone", am: "ማንም = manimi", nr: "ɛni ran", definition: "Any person; whoever.", example: "Anyone can join the club." },
+
+{ en: "anything", am: "ማንኛውንም ነገር = maninyawinimi negeri", nr: "ɛni duɔ̱r", definition: "Any thing; no matter what.", example: "You can choose anything from the menu." },
+
+{ en: "anyway", am: "ለማንኛውም = lemaninyawimi", nr: "ɣɔ̱̱n gɔa̱", definition: "In any case; regardless.", example: "Anyway, let's move on to the next topic." },
+
+{ en: "anywhere", am: "የትም ቦታ = yetimi bota", nr: "ɛni̱ gua̱a̱th", definition: "In or to any place.", example: "You can find the book anywhere in the library." },
+
+{ en: "apart", am: "የተለየ = yeteleye", nr: "ci mɔ kɛl kä", definition: "Separated by distance or time.", example: "They live apart but still keep in touch." },
+
+{ en: "apartment", am: "አፓርታማ = āparitama", nr: "duël mi tëë kɛ do̱r ti ŋua̱n", definition: "A set of rooms forming an individual residence, typically in a building.", example: "She lives in a small apartment downtown." },
+
+{ en: "apparent", am: "ግልጽ = gilits’i", nr: "mi dëë nɛn", definition: "Clearly visible or understood; obvious.", example: "The solution to the problem was apparent after discussion." },
+
+{ en: "apparently", am: "ይመስላል = yimesilali", nr: "kɛ ta̱a̱ in nɛn jɛ", definition: "As far as one knows or can see.", example: "Apparently, they have decided to move." },
+
+{ en: "appeal", am: "ይግባኝ = yigibanyi", nr: "yiɛ̱th di̱wä", definition: "A serious or urgent request.", example: "She made an appeal for help from the community." },
+
+{ en: "appear", am: "ብቅ ይላሉ = bik’i yilalu", nr: "mi ci duɔ̱r jɔac", definition: "To come into sight; become visible or noticeable.", example: "The stars appear at night." },
+
+{ en: "appearance", am: "መልክ = meliki", nr: "jɔa̱c duɔ̱rä", definition: "The way that someone or something looks.", example: "Her appearance was elegant and sophisticated." },
+
+{ en: "apple", am: "ፖም = pomi", nr: "dɔw jia̱th", definition: "A round fruit with red or green skin and a whitish interior.", example: "I like to eat an apple every day." },
+
+{ en: "application", am: "ማመልከቻ = mamelikecha", nr: "thia̱ŋ kɛ kui̱ la̱t", definition: "A formal request to an authority for something.", example: "She submitted her application for the job." },
+
+{ en: "apply", am: "ማመልከት = mameliketi", nr: "thia̱̱ŋ", definition: "To make a formal request.", example: "You need to apply before the deadline." },
+
+{ en: "appoint", am: "መሾም = meshomi", nr: "mi ca ran kuany", definition: "To assign a job or role to someone.", example: "He was appointed as the new manager." },
+
+{ en: "appointment", am: "ቀጠሮ = k’et’ero", nr: "gua̱th mi ca ria̱likä", definition: "An arrangement to meet someone at a particular time.", example: "I have an appointment with the doctor." },
+
+{ en: "appreciate", am: "እናመሰግናለን = inameseginaleni", nr: "la̱t tɛɛthlɔa̱c", definition: "To recognize the full worth of something.", example: "I appreciate your help with the project." },
+
+{ en: "approach", am: "አቀራረብ = āk’erarebi", nr: "mi thiek duɔ̱rɔdɛ", definition: "To come near or nearer to something.", example: "We need to approach this problem carefully." },
+
+{ en: "appropriate", am: "ተገቢ ነው። = tegebī newi.", nr: "mi lot rɔ", definition: "Suitable or proper in the circumstances.", example: "It is appropriate to wear formal clothes to a wedding." },
+
+{ en: "approval", am: "ማጽደቅ = mats’idek’i", nr: "nho̱k tuɔ̱k", definition: "The action of officially agreeing to something.", example: "We received approval for the project." },
+
+{ en: "approve", am: "ማጽደቅ = mats’idek’i", nr: "mi ci nhɔ̱k", definition: "To officially agree to or accept something.", example: "The committee will approve the new rules." },
+
+{ en: "approximately", am: "በግምት = begimiti", nr: "thia̱k kɛ duɔr", definition: "Close to a particular number or time but not exactly that.", example: "The meeting will last approximately one hour." },
+
+
+{ en: "architect", am: "አርክቴክት = ārikitēkiti", nr: "ran thurä", definition: "A person who designs buildings and other structures.", example: "The architect presented his design for the new museum." },
+
+{ en: "area", am: "አካባቢ = ākababī", nr: "gua̱th", definition: "A region or part of a town, a country, or the world.", example: "This area is known for its beautiful parks." },
+
+{ en: "argue", am: "ተከራከሩ = tekerakeru", nr: "ŋaŋnɔm", definition: "To present reasons for or against something.", example: "They often argue about politics." },
+
+{ en: "argument", am: "ክርክር = kirikiri", nr: "ŋaŋnɔm", definition: "A reason or set of reasons given in support of an idea, action, or theory.", example: "His argument was well-reasoned." },
+
+{ en: "arise", am: "ተነሳ = tenesa", nr: "bën nhial", definition: "To come into being; to emerge.", example: "Problems may arise if we do not plan ahead." },
+
+{ en: "arm", am: "ክንድ = kinidi", nr: "tet", definition: "The upper limb of the human body.", example: "He broke his arm during the game." },
+
+{ en: "armed", am: "የታጠቁ = yetat’ek’u", nr: "ram tekɛ mac", definition: "Equipped with or carrying weapons.", example: "The guards were armed for protection." },
+
+{ en: "army", am: "ሰራዊት = serawīti", nr: "dëc", definition: "A large organized body of armed personnel trained for war.", example: "The army was deployed to the border." },
+
+{ en: "around", am: "ዙሪያ = zurīya", nr: "ɛn wanɔ", definition: "Located or situated on every side.", example: "There were trees all around the house." },
+
+{ en: "arrange", am: "አደራደር = āderaderi", nr: "ria̱̱likä", definition: "To put things in a neat, attractive, or required order.", example: "She arranged the books on the shelf." },
+
+{ en: "arrangement", am: "ዝግጅት = zigijiti", nr: "ca̱a̱r ŋɔa̱kni", definition: "The action, process, or result of arranging or being arranged.", example: "The arrangement of the furniture was perfect." },
+
+{ en: "arrest", am: "ማሰር = maseri", nr: "mi ca ran käp", definition: "To seize someone by legal authority and take into custody.", example: "The police arrested the suspect." },
+
+{ en: "arrival", am: "መምጣት = memit’ati", nr: "cuop duɔ̱rä", definition: "The action or process of arriving.", example: "The arrival of the train was delayed." },
+
+{ en: "arrive", am: "መድረስ = mediresi", nr: "mi ci cop", definition: "To reach a place at the end of a journey or a stage in a journey.", example: "They arrived at the airport on time." },
+
+{ en: "art", am: "ስነ ጥበብ = sine t’ibebi", nr: "thuɔ̱r kɛ tet", definition: "The expression or application of human creative skill and imagination, typically in a visual form.", example: "The art gallery featured contemporary paintings." },
+
+{ en: "article", am: "ጽሑፍ = ts’iḥufi", nr: "mi ca gɔr", definition: "A piece of writing included with others in a newspaper, magazine, or other publication.", example: "She wrote an article for the school newspaper." },
+
+{ en: "artist", am: "አርቲስት = āritīsiti", nr: "ra̱m mi thur ŋɔa̱kni", definition: "A person who creates art.", example: "The artist displayed her work at the gallery." },
+
+{ en: "artistic", am: "ጥበባዊ = t’ibebawī", nr: "mi naŋrɔ cet thuor", definition: "Relating to or characteristic of art or artists.", example: "The artistic design of the building was impressive." },
+
+{ en: "as", am: "እንደ = inide", nr: "cet kɛ", definition: "Used in comparisons to refer to the extent or degree of something.", example: "She sings as beautifully as a professional." },
+
+
+{ en: "aside", am: "ወደ ጎን = wede goni", nr: "gekä", definition: "To one side; out of the way.", example: "She set the book aside for later." },
+
+{ en: "ask", am: "ብለው ይጠይቁ = bilewi yit’eyik’u", nr: "thiec", definition: "To say something in order to obtain an answer or some information.", example: "Please ask the teacher for help." },
+
+{ en: "asleep", am: "ተኝቷል = tenyitwali", nr: "tɛɛth niɛn", definition: "In a state of sleep.", example: "The baby is fast asleep in her crib." },
+
+{ en: "aspect", am: "ገጽታ = gets’ita", nr: "tha̱ŋ kä duɔ̱r", definition: "A particular part or feature of something.", example: "Consider every aspect of the situation before deciding." },
+
+{ en: "assault", am: "ጥቃት = t’ik’ati", nr: "ciɛŋ jiëk", definition: "A sudden, violent attack.", example: "The assault on the city was unexpected." },
+
+{ en: "assert", am: "አስረግጠው አስረግጡ = āsiregit’ewi āsiregit’u", nr: "mi latdi duɔ̱r", definition: "To state a fact or belief confidently and forcefully.", example: "He asserted his innocence throughout the trial." },
+
+{ en: "assess", am: "መገምገም = megemigemi", nr: "go̱r ŋäcä ", definition: "To evaluate or estimate the nature, ability, or quality of.", example: "We need to assess the damage after the storm." },
+
+{ en: "assessment", am: "ግምገማ = gimigema", nr: "go̱̱r ŋäcä", definition: "The evaluation or estimation of the nature, quality, or ability of someone or something.", example: "The assessment was completed on time." },
+
+{ en: "asset", am: "ንብረት = nibireti", nr: "kuak", definition: "A useful or valuable thing, person, or quality.", example: "The new technology is a valuable asset to the company." },
+
+{ en: "assign", am: "መመደብ = memedebi", nr: "mi la̱th ji kä duɔ̱r", definition: "To allocate a task or responsibility to someone.", example: "The teacher will assign homework to the students." },
+
+{ en: "assignment", am: "ምደባ = mideba", nr: "mi la̱tkɛ", definition: "A task or piece of work allocated to someone.", example: "The assignment is due next week." },
+
+{ en: "assist", am: "መርዳት = meridati", nr: "luäk", definition: "To help or aid someone in need.", example: "I will assist you with your project." },
+
+{ en: "assistance", am: "እርዳታ = iridata", nr: "luäk", definition: "The action of helping someone with a task or need.", example: "We provide assistance to those in need." },
+
+{ en: "assistant", am: "ረዳት = redati", nr: "ra̱m mi tho̱p luäk", definition: "A person who helps in a specific role or task.", example: "She works as an assistant in the office." },
+
+{ en: "associate", am: "ተባባሪ = tebabarī", nr: "mi ro̱̱mi ŋuani", definition: "To connect or bring into relation with something.", example: "He is an associate member of the club." },
+
+{ en: "association", am: "ማህበር = mahiberi", nr: "buɔ̱n naath", definition: "A group of people organized for a joint purpose.", example: "She is part of a professional association." },
+
+{ en: "assume", am: "መገመት = megemeti", nr: "na̱ŋ inɔ", definition: "To take on a responsibility or role.", example: "I assume that you will come to the meeting." },
+
+{ en: "assumption", am: "ግምት = gimiti", nr: "ta̱a̱ in ca̱r jɛ", definition: "A thing that is accepted as true without proof.", example: "The assumption was based on preliminary data." },
+
+{ en: "assure", am: "አረጋግጥ = āregagit’i", nr: "la̱r jɛ", definition: "To tell someone something positively to dispel any doubts.", example: "I assure you that everything will be alright." },
+
+{ en: "at", am: "በ = be", nr: "thin", definition: "Used to indicate a location or position.", example: "I will meet you at the park." },
+
+{ en: "athlete", am: "አትሌት = ātilēti", nr: "ram mi wur", definition: "A person who is proficient in sports and other forms of physical exercise.", example: "The athlete trained hard for the competition." },
+
+{ en: "athletic", am: "አትሌቲክስ = ātilētīkisi", nr: "buom pua̱ny", definition: "Physically strong, fit, and active.", example: "She has an athletic build from years of training." },
+
+{ en: "atmosphere", am: "ከባቢ አየር = kebabī āyeri", nr: "jiɔm nhial", definition: "The envelope of gases surrounding the earth or another planet.", example: "The atmosphere was filled with excitement during the event." },
+
+{ en: "attach", am: "ማያያዝ = mayayazi", nr: "la̱th thi̱n", definition: "To fasten or join one thing to another.", example: "Please attach the file to your email." },
+
+{ en: "attack", am: "ማጥቃት = mat’ik’ati", nr: "no̱ŋ ko̱̱r", definition: "To take aggressive action against someone or something.", example: "The army launched an attack at dawn." },
+
+{ en: "attempt", am: "ሙከራ = mukera", nr: "mi ɣɔni duɔr", definition: "To try to achieve something, typically requiring effort.", example: "She made an attempt to solve the puzzle." },
+
+{ en: "attend", am: "ተገኝ = tegenyi", nr: "wä ka̱ duɔr", definition: "To be present at an event, meeting, or function.", example: "I will attend the conference next week." },
+
+{ en: "attention", am: "ትኩረት = tikureti", nr: "na̱̱ŋ cärä", definition: "Notice taken of someone or something; the regard shown by someone.", example: "The teacher called for the students' attention." },
+
+{ en: "attitude", am: "አመለካከት = āmelekaketi", nr: "ta̱a̱ lɔa̱c", definition: "A settled way of thinking or feeling about something.", example: "Her attitude toward the project was very positive." },
+
+{ en: "attorney", am: "ጠበቃ = t’ebek’a", nr: "luuk", definition: "A person appointed to act for another in business or legal matters.", example: "She hired an attorney to help with the case." },
+
+{ en: "attract", am: "መሳብ = mesabi", nr: "mi bɛr lɔc", definition: "To draw by appeal or attraction.", example: "The flowers attract many bees." },
+
+{ en: "attractive", am: "ማራኪ = marakī", nr: "mi bɛ̱r lɔc naa̱th", definition: "Pleasing or appealing to the senses.", example: "The painting is very attractive." },
+
+{ en: "attribute", am: "ባህሪ = bahirī", nr: "ciaŋ duɔ̱rä", definition: "A quality or feature regarded as a characteristic of someone or something.", example: "Patience is a valuable attribute in a leader." },
+
+{ en: "audience", am: "ታዳሚ = tadamī", nr: "nɛy tin liŋ", definition: "The assembled spectators or listeners at a public event.", example: "The audience applauded after the performance." },
+
+{ en: "author", am: "ደራሲ = derasī", nr: "ra̱m mi gɔr bok", definition: "A writer of a book, article, or report.", example: "The author of the book is well-known." },
+
+{ en: "authority", am: "ሥልጣን = šilit’ani", nr: "buɔm", definition: "The power or right to give orders, make decisions, and enforce obedience.", example: "The authority of the committee is recognized by all." },
+
+{ en: "auto", am: "አውቶማቲክ = āwitomatīki", nr: "yieth mi la̱t ka rɔa", definition: "Relating to or denoting a vehicle that operates automatically.", example: "He drives an auto with advanced features." },
+
+{ en: "available", am: "ይገኛል = yigenyali", nr: "mi të thi̱n", definition: "Able to be used or obtained; at someone's disposal.", example: "The information is available online." },
+
+{ en: "average", am: "አማካይ = āmakayi", nr: "mi të kam mɔ", definition: "A number that represents the typical value in a set of data.", example: "The average temperature this week is mild." },
+
+{ en: "avoid", am: "ማስወገድ = masiwegedi", nr: "mi gaŋi", definition: "To keep away from or stop oneself from doing something.", example: "It's best to avoid crowded places during the pandemic." },
+
+{ en: "award", am: "ሽልማት = shilimati", nr: "muc", definition: "Something given to someone to recognize their achievement.", example: "She received an award for her outstanding performance." },
+
+{ en: "aware", am: "የሚያውቅ = yemīyawik’i", nr: "tëë kɛ ŋäc", definition: "Having knowledge or perception of a situation or fact.", example: "She is aware of the upcoming changes." },
+
+{ en: "awareness", am: "ግንዛቤ = ginizabē", nr: "lär ŋäc", definition: "Knowledge or perception of a situation or fact.", example: "The campaign raised awareness about environmental issues." },
+
+{ en: "away", am: "ሩቅ = ruk’i", nr: "gua̱th mi na̱n", definition: "At a distance from a particular place or person.", example: "She lives far away from the city." },
+
+{ en: "awful", am: "አስፈሪ = āsiferī", nr: "mi jia̱k ɛlɔŋ", definition: "Extremely bad or unpleasant.", example: "The weather was awful during the trip." },
+
+{ en: "baby", am: "ሕፃን = ḥit͟s’ani", nr: "gat", definition: "A very young child, especially one newly or recently born.", example: "The baby is sleeping peacefully." },
+
+{ en: "back", am: "ተመለስ = temelesi", nr: "jɔk", definition: "The rear surface of the human body, from the shoulders to the hips.", example: "He has a tattoo on his back." },
+
+{ en: "background", am: "ዳራ = dara", nr: "jɔ̱k kä duɔ̱r", definition: "The area or scenery behind the main object of contemplation.", example: "The mountains were beautiful in the background." },
+
+{ en: "bad", am: "መጥፎ = met’ifo", nr: "mi jiäk", definition: "Of poor quality or low standard; not good.", example: "That was a bad decision." },
+
+{ en: "badly", am: "በመጥፎ ሁኔታ = bemet’ifo hunēta", nr: "ɛ jiäk", definition: "In a bad manner; poorly.", example: "He performed badly on the exam." },
+
+{ en: "bag", am: "ቦርሳ = borisa", nr: "bɛk", definition: "A flexible container with an opening at the top, used for carrying things.", example: "She packed her bag for the trip." },
+
+{ en: "bake", am: "መጋገር = megageri", nr: "bul jura̱yni", definition: "To cook food by dry heat without direct exposure to a flame.", example: "She likes to bake cookies on weekends." },
+
+{ en: "balance", am: "ሚዛን = mīzani", nr: "them duɔ̱rä", definition: "An even distribution of weight enabling someone or something to remain upright.", example: "He lost his balance and fell over." },
+
+{ en: "ball", am: "ኳስ = kwasi", nr: "kurɛ", definition: "A round object used in various games and sports.", example: "They played catch with a ball." },
+
+{ en: "ban", am: "እገዳ = igeda", nr: "mi ca duɔr woc kɛ ŋut", definition: "To officially or legally prohibit something.", example: "The government decided to ban smoking in public places." },
+
+{ en: "band", am: "ባንድ = banidi", nr: "buɔ̱n ji kitdä", definition: "A group of musicians who play together.", example: "The band played a variety of songs at the festival." },
+
+{ en: "bank", am: "ባንክ = baniki", nr: "gua̱th tɔwä yio̱wni", definition: "A financial institution that accepts deposits from the public.", example: "She deposited her paycheck at the bank." },
+
+{ en: "bar", am: "ባር = bari", nr: "gua̱th kɔŋä", definition: "A counter where food and drinks are served.", example: "They enjoyed drinks at the bar after dinner." },
+
+{ en: "barely", am: "በጭንቅ = bech’inik’i", nr: "thiëk", definition: "Only just; by a very small margin.", example: "She barely passed the exam." },
+
+
+{ en: "barrier", am: "እንቅፋት = inik’ifati", nr: "min pen duɔ̱r", definition: "A fence or obstacle that prevents movement or access.", example: "The barrier blocked the road after the storm." },
+
+{ en: "base", am: "መሠረት = mešereti", nr: "pëk in tëë pi̱ny", definition: "The bottom support of anything; that on which a thing stands or rests.", example: "The base of the statue is made of marble." },
+
+
+{ en: "basic", am: "መሰረታዊ = meseretawī", nr: "tuk diɛn", definition: "Forming an essential foundation or starting point; fundamental.", example: "The basic principles of math are important to understand." },
+
+{ en: "basically", am: "በመሠረቱ = bemešeretu", nr: "duop luthe", definition: "In the most essential respects; fundamentally.", example: "Basically, it's all about teamwork and communication." },
+
+{ en: "basis", am: "መሠረት = mešereti", nr: "tukdɛ", definition: "The underlying support or foundation for an idea, argument, or process.", example: "The basis of her argument was solid." },
+
+
+
+{ en: "bathroom", am: "መታጠቢያ ቤት = metat’ebīya bēti", nr: "gua̱th puɔ̱kä", definition: "A room containing a toilet and sink; often includes a bath or shower.", example: "Please wash your hands in the bathroom." },
+
+
+{ en: "battle", am: "ጦርነት = t’orineti", nr: "gua̱th ko̱̱r mi diit", definition: "A sustained fight between large organized armed forces.", example: "The battle lasted for several hours." },
+
+
+{ en: "beach", am: "የባህር ዳርቻ = yebahiri daricha", nr: "liɛt thuok yiër", definition: "A pebbly or sandy shore by a body of water.", example: "We spent the day relaxing on the beach." },
+
+{ en: "bean", am: "ባቄላ = bak’ēla", nr: "ŋɔa̱r", definition: "An edible seed, typically kidney-shaped, used as food.", example: "She added beans to the salad for extra protein." },
+
+{ en: "bear", am: "ድብ = dibi", nr: "nyɛkudhuny", definition: "A large, heavy mammal with thick fur and a very short tail.", example: "We saw a bear at the wildlife park." },
+
+{ en: "beat", am: "ደበደቡት = debedebuti.", nr: "duäc", definition: "To strike or hit repeatedly.", example: "He can beat the drum very well." },
+
+{ en: "beautiful", am: "ቆንጆ = k’onijo", nr: "mi gɔa̱ ɛlɔŋ", definition: "Pleasing the senses or mind aesthetically.", example: "The sunset was absolutely beautiful." },
+
+{ en: "beauty", am: "ውበት = wibeti", nr: "gɔy pua̱ny", definition: "A combination of qualities that pleases the aesthetic senses.", example: "The beauty of nature is inspiring." },
+
+{ en: "because", am: "ምክንያቱም = mikiniyatumi", nr: "kɛ ɣöö", definition: "For the reason that; due to the fact that.", example: "She was late because of the traffic." },
+
+{ en: "become", am: "መሆን = mehoni", nr: "bi la", definition: "To begin to be; to come into existence.", example: "He wants to become a doctor." },
+
+{ en: "bed", am: "አልጋ = āliga", nr: "dha̱ŋrɛb", definition: "A piece of furniture for sleep or rest, typically a framework with a mattress.", example: "She made her bed every morning." },
+
+{ en: "bedroom", am: "መኝታ ቤት = menyita bēti", nr: "duël tɔcä", definition: "A room for sleeping in.", example: "The bedroom is painted a calming blue." },
+
+{ en: "beer", am: "ቢራ = bīra", nr: "kɔaŋ", definition: "An alcoholic drink made from yeast and fermented grains.", example: "They enjoyed a cold beer on a hot day." },
+
+{ en: "before", am: "ከዚህ በፊት = kezīhi befīti", nr: "a ŋot", definition: "In front of; earlier than.", example: "Please arrive before the meeting starts." },
+
+{ en: "begin", am: "ጀምር = jemiri", nr: "tuɔ̱k", definition: "To start; to commence.", example: "They will begin the project next week." },
+
+{ en: "beginning", am: "መጀመር = mejemeri", nr: "tuk kä duɔ̱r", definition: "The point in time or space at which something starts.", example: "At the beginning of the movie, the main character is introduced."},
+
+{ en: "behavior", am: "ባህሪ = bahirī", nr: "ta̱a̱ ciɛŋä ran", definition: "The way in which one acts or conducts oneself.", example: "His behavior in class was exemplary."},
+
+{ en: "behind", am: "ከኋላ = keḫwala", nr: "jɔk", definition: "At the back of; in the rear.", example: "The cat is hiding behind the couch."},
+
+{ en: "being", am: "መሆን = mehoni", nr: "mi mɔ", definition: "Existence; the nature or essence of a person or thing.", example: "The concept of being has been debated for centuries."},
+
+{ en: "belief", am: "እምነት = imineti", nr: "mi ŋa̱thkɛ", definition: "An acceptance that something exists or is true, especially without proof.", example: "Her belief in justice motivates her actions."},
+
+{ en: "believe", am: "ማመን = mameni", nr: "ŋa̱th", definition: "To accept something as true; to have faith in.", example: "I believe in the power of education."},
+
+{ en: "bell", am: "ደወል = deweli", nr: "löth", definition: "A hollow instrument that makes a ringing sound when struck.", example: "The bell rang to signal the end of the class."},
+
+{ en: "belong", am: "ንብረት = nibireti", nr: "duŋ ran", definition: "To be the property of; to be a member of.", example: "These books belong to the library."},
+
+{ en: "below", am: "በታች = betachi", nr: "pi̱ny", definition: "In a lower place; beneath.", example: "The temperature is below freezing today."},
+
+{ en: "belt", am: "ቀበቶ = k’ebeto", nr: "ga̱̱c", definition: "A strip of material worn around the waist to support clothing or carry items.", example: "He wore a leather belt with his pants."},
+
+{ en: "bench", am: "አግዳሚ ወንበር = āgidamī weniberi", nr: "ka̱rna̱b", definition: "A long seat for multiple people, often found in parks.", example: "They sat on the bench to enjoy the view."},
+
+{ en: "bend", am: "ማጠፍ = mat’efi", nr: "guɔ̱ŋ", definition: "To shape or force something into a curve or angle.", example: "Please bend the wire to fit the frame."},
+
+{ en: "beneath", am: "በታች = betachi", nr: "pi̱ny kä duɔ̱r", definition: "Directly underneath; in a lower position.", example: "The cat is hiding beneath the table."},
+
+{ en: "benefit", am: "ጥቅም = t’ik’imi", nr: "min jëkɛ", definition: "An advantage or profit gained from something.", example: "Regular exercise has many health benefits."},
+
+{ en: "beside", am: "ከጎን = kegoni", nr: "gëkä kä", definition: "At the side of; next to.", example: "She sat beside her friend during the movie."},
+
+{ en: "besides", am: "በተጨማሪ = betechemarī", nr: "kui̱y kä", definition: "In addition to; apart from.", example: "Besides studying, he enjoys playing sports."},
+
+{ en: "best", am: "ምርጥ = mirit’i", nr: "mi gɔa̱ ni jɛn", definition: "Of the highest quality, excellence, or standing.", example: "She gave her best effort on the exam."},
+
+{ en: "bet", am: "ውርርድ = wiriridi", nr: "yieth yioni", definition: "To risk something, usually money, on the outcome of an event.", example: "He decided to bet on the horse race."},
+
+{ en: "better", am: "የተሻለ = yeteshale", nr: "gɔa̱", definition: "Of a more excellent quality; superior.", example: "She is feeling better today than yesterday."},
+
+{ en: "between", am: "መካከል = mekakeli", nr: "kamä", definition: "In the space separating two points, objects, or people.", example: "There is a park between the two buildings."},
+
+{ en: "beyond", am: "በላይ = belayi", nr: "mi bäl", definition: "At or to the further side of; outside the limits of.", example: "The mountains are beyond the river."},
+
+{ en: "Bible", am: "መጽሐፍ ቅዱስ = mets’iḥāfi k’idusi", nr: "Baibol", definition: "The sacred scripture of Christians, comprising the Old and New Testaments.", example: "She reads the Bible every morning."},
+
+{ en: "big", am: "ትልቅ = tilik’i", nr: "mi diit", definition: "Of considerable size, extent, or capacity.", example: "They have a big house with a garden."},
+
+{ en: "bike", am: "ብስክሌት = bisikilēti", nr: "ɣa̱njɛlɛ", definition: "A bicycle or motorcycle.", example: "He rides his bike to school every day."},
+
+{ en: "bill", am: "ሂሳብ = hīsabi", nr: "yio̱w tin wä raar", definition: "A statement of charges for goods or services.", example: "Please pay the bill at the end of the meal."},
+
+
+{ en: "bind", am: "ማሰር = maseri", nr: "ma̱t kɛl", definition: "To tie or secure something tightly.", example: "Please bind the package with string."},
+
+
+{ en: "bird", am: "ወፍ = wefi", nr: "dit", definition: "A warm-blooded vertebrate distinguished by feathers and wings.", example: "The bird sang beautifully in the morning."},
+
+{ en: "birth", am: "መወለድ = meweledi", nr: "da̱p gatda̱", definition: "The emergence of a baby or other offspring from the body of its parent.", example: "The birth of the baby was a joyful occasion."},
+
+{ en: "birthday", am: "የልደት ቀን = yelideti k’eni", nr: "cäŋ diëth", definition: "The anniversary of the day on which a person was born.", example: "We celebrated her birthday with a party."},
+
+{ en: "bit", am: "ትንሽ = tinishi", nr: "mi tɔt kä duɔ̱r", definition: "A small piece, part, or quantity of something.", example: "Just a bit of sugar is needed for the recipe."},
+
+{ en: "bite", am: "መንከስ = menikesi", nr: "ka̱c kɛ lɛc", definition: "To use the teeth to cut into something.", example: "Be careful not to bite your tongue."},
+
+{ en: "black", am: "ጥቁር = t’ik’uri", nr: "biɛl mi ca̱r", definition: "The darkest color, the result of the absence of or complete absorption of light.", example: "She wore a beautiful black dress."},
+
+{ en: "blade", am: "ስለት = sileti", nr: "jɔk ŋɔa̱m", definition: "The flat cutting edge of a tool or weapon.", example: "He sharpened the blade of the knife."},
+
+{ en: "blame", am: "ተወቃሽ = tewek’ashi", nr: "mi bɛli ran", definition: "To assign responsibility for a fault or wrong.", example: "Don’t blame others for your mistakes."},
+
+{ en: "blanket", am: "ብርድ ልብስ = biridi libisi", nr: "pa̱ta̱n", definition: "A large piece of fabric used for warmth or covering.", example: "She wrapped herself in a warm blanket."},
+
+{ en: "blind", am: "ዓይነ ስውር = ‘ayine siwiri", nr: "rami cɔ̱r", definition: "Unable to see; lacking sight.", example: "The blind man navigated the streets with a cane."},
+
+{ en: "block", am: "አግድ = āgidi", nr: "gäk raar", definition: "A solid piece of hard material; to obstruct.", example: "They used a block of wood to hold the door open."},
+
+{ en: "blood", am: "ደም = demi", nr: "riɛ̱m", definition: "The red liquid that circulates in the arteries and veins.", example: "He donated blood to help those in need."},
+
+{ en: "blow", am: "ንፉ = nifu", nr: "kuɔ̱th duɔ̱rä", definition: "To expel air through pursed lips or from the lungs.", example: "He gave a blow to the whistle to signal the start."},
+
+{ en: "blue", am: "ሰማያዊ = semayawī", nr: "biɛl mi yiël", definition: "A color that resembles the sky or sea.", example: "She painted the walls a soothing blue."},
+
+{ en: "board", am: "ሰሌዳ = selēda", nr: "thubur", definition: "A flat piece of material; to get on a vehicle.", example: "We need to board the plane by 6 PM."},
+
+{ en: "boat", am: "ጀልባ = jeliba", nr: "bo̱t", definition: "A small vessel for traveling on water.", example: "They took a boat to the island."},
+
+{ en: "body", am: "አካል = ākali", nr: "puɔ̱̱ny", definition: "The physical structure of a person or animal.", example: "Exercise is important for a healthy body."},
+
+
+
+
+{ en: "bone", am: "አጥንት = āt’initi", nr: "cɔ̱a̱", definition: "The hard, structural component of vertebrate skeletons.", example: "The dog buried a bone in the backyard."},
+
+{ en: "book", am: "መጽሐፍ = mets’iḥāfi", nr: "bok", definition: "A set of written or printed pages bound together.", example: "She borrowed a book from the library."},
+
+
+{ en: "boot", am: "ቡት = buti", nr: "wa̱r", definition: "A sturdy footwear that covers the ankle.", example: "He wore his boots for the hike."},
+
+{ en: "border", am: "ድንበር = diniberi", nr: "kam", definition: "A line separating two political or geographical areas.", example: "They crossed the border into another country."},
+
+{ en: "born", am: "ተወለደ = tewelede", nr: "cɔ̱a̱", definition: "To come into existence as a living being.", example: "She was born in July."},
+
+{ en: "borrow", am: "መበደር = mebederi", nr: "na̱ŋ ŋua̱lä", definition: "To take and use (something belonging to someone else) with the intention of returning it.", example: "Can I borrow your pen for a moment?"},
+
+{ en: "boss", am: "አለቃ = ālek’a", nr: "ra̱̱m mi tëë wi nath", definition: "A person in charge of a worker or organization.", example: "My boss gave me a promotion."},
+
+{ en: "both", am: "ሁለቱም = huletumi", nr: "kɛn da̱ŋ rɛw", definition: "The two; used to refer to two people or things together.", example: "Both of them attended the meeting."},
+
+{ en: "bother", am: "ማስጨነቅ = masich’enek’i", nr: "mi jut i ran", definition: "To take the trouble to do something; to annoy or disturb.", example: "Please don’t bother me while I’m working."},
+
+{ en: "bottle", am: "ጠርሙስ = t’erimusi", nr: "gida̱th", definition: "A container, typically made of glass or plastic, used for liquids.", example: "She filled the bottle with water."},
+
+{ en: "bottom", am: "ከታች = ketachi", nr: "pi̱ny kä duɔ̱r", definition: "The lowest part or surface of something.", example: "The treasure was found at the bottom of the ocean."},
+
+{ en: "boundary", am: "ድንበር = diniberi", nr: "key wini", definition: "A line that marks the limits of an area; a dividing line.", example: "The boundary between the two countries is well marked."},
+
+{ en: "bowl", am: "ጎድጓዳ ሳህን = godigwada sahini", nr: "tuɔ̱k kuan", definition: "A round, deep dish used for food or liquid.", example: "He ate cereal from a bowl."},
+
+{ en: "box", am: "ሳጥን = sat’ini", nr: "thanduk", definition: "A container with flat sides and a lid, used for storing items.", example: "She packed her clothes in a box."},
+
+{ en: "boy", am: "ወንድ ልጅ = wenidi liji", nr: "dhɔ̱l", definition: "A male child or young man.", example: "The boy played soccer in the park."},
+
+{ en: "boyfriend", am: "የወንድ ጓደኛ = yewenidi gwadenya", nr: "lum mi mɔ wut", definition: "A male friend or romantic partner.", example: "She introduced her boyfriend to her family."},
+
+{ en: "brain", am: "አንጎል = ānigoli", nr: "ŋi̱th", definition: "The organ of thought and control in the body.", example: "The brain is vital for all bodily functions."},
+
+{ en: "branch", am: "ቅርንጫፍ = k’irinich’afi", nr: "kaar", definition: "A part of a tree that grows out from the trunk.", example: "The branch swayed gently in the wind."},
+
+{ en: "brand", am: "የምርት ስም = yemiriti simi", nr: "ciot mi nyoth kua̱k", definition: "A name given to a product or service.", example: "She prefers that brand of shoes."},
+
+{ en: "bread", am: "ዳቦ = dabo", nr: "jura̱y", definition: "A staple food made from flour and water.", example: "They baked fresh bread for breakfast."},
+
+{ en: "break", am: "መስበር = mesiberi", nr: "lɔa̱ŋ", definition: "To separate into pieces; to interrupt.", example: "Be careful not to break the glass."},
+
+{ en: "breakfast", am: "ቁርስ = k’urisi", nr: "miɛ̱th ruɔ̱nwa̱ŋ", definition: "The first meal of the day, typically eaten in the morning.", example: "I usually have eggs for breakfast."},
+
+{ en: "breast", am: "ጡት = t’uti", nr: "thin", definition: "The front part of a person's body, between the neck and the abdomen.", example: "The mother breastfed her baby."},
+
+{ en: "breath", am: "እስትንፋስ = isitinifasi", nr: "yië", definition: "The air taken into or expelled from the lungs.", example: "She took a deep breath before speaking."},
+
+{ en: "breathe", am: "መተንፈስ = metenifesi", nr: "yiëɣ", definition: "To take air into the lungs and expel it.", example: "It’s important to breathe deeply during exercise."},
+
+{ en: "brick", am: "ጡብ = t’ubi", nr: "tuɔpni", definition: "A rectangular block used for building.", example: "The house was made of red bricks."},
+
+{ en: "bridge", am: "ድልድይ = dilidiyi", nr: "kuprii", definition: "A structure built to span a physical obstacle.", example: "We crossed the bridge to get to the other side."},
+
+{ en: "brief", am: "አጭር = āch’iri", nr: "mi tɔt", definition: "Short in duration or extent.", example: "He gave a brief overview of the project."},
+
+{ en: "briefly", am: "በአጭሩ = be’āch’iru", nr: "kɛ gua̱a̱th mi̱ ciɛk", definition: "In a concise manner; for a short time.", example: "She explained the concept briefly."},
+
+{ en: "bright", am: "ብሩህ = biruhi", nr: "mi buɔ̱y buɔ̱y", definition: "Giving out or reflecting a lot of light; vivid.", example: "The bright sun shone in the sky."},
+
+{ en: "brilliant", am: "ብሩህ = biruhi", nr: "pɛl mi diit", definition: "Exceptionally clever or talented; very bright.", example: "She had a brilliant idea for the project."},
+
+{ en: "bring", am: "አምጣ = āmit’a", nr: "no̱ŋni", definition: "To carry or convey something to a place.", example: "Please bring the documents to the meeting."},
+
+
+{ en: "broad", am: "ሰፊ = sefī", nr: "mi diit", definition: "Wide in extent from side to side.", example: "The river was broad and deep."},
+
+{ en: "broken", am: "የተሰበረ = yetesebere", nr: "mi ci tiath", definition: "Damaged and no longer in one piece.", example: "The vase was broken into several pieces."},
+
+{ en: "brother", am: "ወንድም = wenidimi", nr: "dämar", definition: "A male sibling.", example: "My brother lives in another city."},
+
+{ en: "brown", am: "ብናማ = binama", nr: "biɛl mi lɔw ", definition: "A color produced by mixing red, yellow, and blue.", example: "She wore a beautiful brown dress."},
+
+{ en: "brush", am: "ብሩሽ = birushi", nr: "tuuth", definition: "An implement with bristles used for cleaning or painting.", example: "She used a brush to paint the canvas."},
+
+
+{ en: "budget", am: "በጀት = bejeti", nr: "däkni yio̱wni kä lät", definition: "An estimate of income and expenditure for a set period.", example: "We need to create a budget for the project."},
+
+{ en: "build", am: "መገንባት = megenibati", nr: "mi täth kɛ", definition: "To construct by putting parts or materials together.", example: "They plan to build a new school next year."},
+
+{ en: "building", am: "መገንባት = megenibati", nr: "duël mi ca täth", definition: "A structure with a roof and walls.", example: "The building was designed by a famous architect."},
+{ en: "bullet", am: "ጥይት = t’iyiti", nr: "dɔmaac", definition: "A projectile for a firearm.", example: "The bullet struck the target accurately."},
+
+{ en: "bunch", am: "ጥቅል = t’ik’ili", nr: "ti cät ti ca ma̱t kɛl", definition: "A number of things of the same kind grouped together.", example: "She bought a bunch of bananas."},
+
+{ en: "burden", am: "ሸክም = shekimi", nr: "la̱t mi thiɛ̱k thiɛ̱k", definition: "A heavy load; something that is carried.", example: "He felt the burden of responsibility."},
+
+{ en: "burn", am: "ማቃጠል = mak’at’eli", nr: "waŋ kɛ maac", definition: "To destroy or injure by fire.", example: "Be careful not to burn yourself while cooking."},
+
+{ en: "bury", am: "መቅበር = mek’iberi", nr: "kuɔ̱ny duɔ̱rä", definition: "To place a dead person in the ground.", example: "They decided to bury their pet in the backyard."},
+
+{ en: "bus", am: "አውቶቡስ = āwitobusi", nr: "ba̱th", definition: "A large motor vehicle for transporting passengers.", example: "The bus was late today."},
+
+{ en: "business", am: "ንግድ = nigidi", nr: "ko̱̱k ŋɔäkni", definition: "The practice of making one's living by engaging in commerce.", example: "She started her own business last year."},
+
+{ en: "busy", am: "ሥራ የበዛበት = šira yebezabeti", nr: "lät ti ŋua̱n", definition: "Occupied with tasks; having a lot to do.", example: "I am too busy to meet today."},
+
+{ en: "but", am: "ግን = gini", nr: "kuɛ la ɣöö", definition: "Used to introduce a phrase or clause contrasting with what has already been mentioned.", example: "I like coffee, but I prefer tea."},
+
+{ en: "butter", am: "ቅቤ = k’ibē", nr: "liɛ̱th", definition: "A solid dairy product made from cream.", example: "She spread butter on her toast."},
+
+{ en: "button", am: "አዝራር = āzirari", nr: "min tua̱nykɛ", definition: "A small disc or knob used to fasten something.", example: "He pressed the button to call for help."},
+
+{ en: "buy", am: "ግዛ = giza", nr: "mi kɔki duɔr", definition: "To acquire in exchange for payment.", example: "I want to buy a new phone."},
+
+{ en: "buyer", am: "ገዢ = gezhī", nr: "ram min kɔk duɔ̱r", definition: "A person who purchases goods or services.", example: "The buyer was interested in a good deal."},
+
+{ en: "by", am: "በ = be", nr: "kɛ", definition: "Identifying the agent performing an action.", example: "The book was written by her."},
+
+
+
+
+
+{ en: "calculate", am: "አስላ = āsila", nr: "mi kuɛni, kiɛ mi dua̱ci", definition: "To determine mathematically.", example: "You need to calculate the total cost."},
+
+{ en: "call", am: "ይደውሉ = yidewilu", nr: "mi cɔ̱li raan", definition: "To speak to someone on the phone or shout their name.", example: "I will call you later."},
+
+
+
+{ en: "campaign", am: "ዘመቻ = zemecha", nr: "la̱t thia̱thɛ", definition: "An organized effort to achieve a goal, often political.", example: "The campaign for clean water was successful."},
+
+
+{ en: "can", am: "ይችላል = yichilali", nr: "lua̱ŋ", definition: "To be able to; to have the ability to.", example: "I can help you with that."},
+
+
+
+
+
+{ en: "capability", am: "ችሎታ = chilota", nr: "lua̱ŋ", definition: "The power or ability to do something.", example: "The machine has the capability to process data quickly."},
+
+{ en: "capable", am: "የሚችል = yemīchili", nr: "lua̱ŋ kä duɔ̱r", definition: "Having the ability to do something.", example: "She is capable of completing the project on time."},
+
+{ en: "capacity", am: "አቅም = āk’imi", nr: "min de̱rɛ lua̱ŋ", definition: "The maximum amount that something can contain.", example: "The stadium has a seating capacity of 50,000."},
+
+{ en: "capital", am: "ካፒታል = kapītali", nr: "wec in diit kiɛ kua̱k lätdä", definition: "A city that serves as the seat of government; also refers to wealth used to invest.", example: "Addis Ababa is the capital of Ethiopia."},
+
+
+{ en: "capture", am: "መያዝ = meyazi", nr: "mi ka̱pi duɔr", definition: "To take possession of something, often by force.", example: "The police managed to capture the suspect."},
+
+{ en: "car", am: "መኪና = mekīna", nr: "thurbil", definition: "A road vehicle powered by an engine.", example: "She drives her car to work every day."},
+
+    { en: "dad", am: "አባት = ābati", nr: "gua̱n ra̱n", definition: "A male parent.", example: "My dad always helps me with my homework." },
+    { en: "daily", am: "በየቀኑ = beyek’enu", nr: "ni ciaŋ", definition: "Occurring every day.", example: "I take a walk daily." },
+    { en: "damage", am: "ጉዳት = gudati", nr: "ya̱ri duɔ̱rä ", definition: "Physical harm that impairs the value or usefulness of something.", example: "The storm caused significant damage to the house." },
+    { en: "dance", am: "ዳንስ = danisi", nr: "duth", definition: "A series of rhythmic steps or movements performed to music.", example: "We love to dance at parties." },
+    { en: "danger", am: "አደጋ = ādega", nr: "riɛ̱k", definition: "The possibility of suffering harm or injury.", example: "There is a danger of flooding in this area." },
+    { en: "dangerous", am: "አደገኛ = ādegenya", nr: "mi de riɛk no̱̱ŋ", definition: "Able or likely to cause harm or injury.", example: "It is dangerous to drive without wearing a seatbelt." },
+    { en: "dare", am: "ደፋር = defari", nr: "mi deri lua̱ŋ", definition: "To have the courage to do something.", example: "I dare you to jump into the pool." },
+    { en: "dark", am: "ጨለማ = ch’elema", nr: "mi col col", definition: "With little or no light.", example: "It gets dark early in winter." },
+    { en: "darkness", am: "ጨለማ = ch’elema", nr: "muth", definition: "The absence of light.", example: "The darkness of the night was overwhelming." },
+    { en: "data", am: "ውሂብ = wihībi", nr: "läri", definition: "Facts and statistics collected for reference or analysis.", example: "The data shows a significant increase in sales." },
+    { en: "date", am: "ቀን = k’eni", nr: "cäŋ kä pay", definition: "The day of the month or year as specified by a number.", example: "What date is your birthday?" },
+    { en: "daughter", am: "ሴት ልጅ = sēti liji", nr: "gat nyal", definition: "A female child or offspring.", example: "My daughter loves to read books." },
+    { en: "day", am: "ቀን = k’eni", nr: "cäŋ", definition: "A period of 24 hours as a unit of time.", example: "Today is a beautiful day." },
+    { en: "dead", am: "የሞተ = yemote", nr: "mi ci li̱w", definition: "No longer alive.", example: "The plant is dead due to lack of water." },
+    { en: "each", am: "እያንዳንዱ = iyanidanidu", nr: "kɛl kɛli", definition: "Used to refer to every one of two or more people or things, regarded separately.", example: "Each student must complete the assignment." },
+    { en: "eager", am: "ጉጉት = guguti", nr: "mi yɔ̱thɛ̱ ji, go̱̱r kɛ min bi tuɔ̱k", definition: "Wanting to do or have something very much.", example: "She is eager to start her new job." },
+    { en: "ear", am: "ጆሮ = joro", nr: "jith", definition: "The organ of hearing and balance in humans and other vertebrates.", example: "He whispered in my ear." },
+    { en: "early", am: "ቀደም ብሎ = k’edemi bilo", nr: "kɛ tukdɛ", definition: "Happening or done before the usual or expected time.", example: "I like to wake up early in the morning." },
+    { en: "earn", am: "ማግኘት = maginyeti", nr: "jëk kä duɔ̱r", definition: "To receive money in return for work.", example: "She earns a good salary at her job." },
+    { en: "earnings", am: "ገቢዎች = gebīwochi", nr: "yiöw tin jeki", definition: "Money obtained in return for labor or services.", example: "His earnings have increased this year." },
+    { en: "earth", am: "ምድር = midiri", nr: "wi̱cmuɔ̱n", definition: "The planet on which we live.", example: "The earth revolves around the sun." },
+    { en: "ease", am: "ቅለት = k’ileti", nr: "jak kä duɔ̱r kä thia̱k", definition: "The state of being comfortable or free from worry.", example: "She spoke with ease during the presentation." },
+    { en: "easily", am: "በቀላሉ = bek’elalu", nr: "ɛ thia̱k", definition: "Without difficulty.", example: "He can easily solve complex problems." },
+    { en: "east", am: "ምስራቅ = misirak’i", nr: "cuëc ɣɔa̱", definition: "The direction toward the sunrise.", example: "The sun rises in the east." },
+    { en: "easy", am: "ቀላል = k’elali", nr: "ɛ thia̱k", definition: "Achieved without great effort.", example: "This puzzle is easy to solve." },
+    { en: "eat", am: "ብላ = bila", nr: "cam", definition: "To put food into the mouth, chew, and swallow it.", example: "I like to eat healthy meals." },
+    { en: "economic", am: "ኢኮኖሚያዊ = īkonomīyawī", nr: "ta̱a̱ kua̱kni we̱c", definition: "Relating to economics or the economy.", example: "The country is experiencing economic growth." },
+    { en: "face", am: "ፊት = fīti", nr: "nhiam", definition: "The front part of a person's head.", example: "She has a beautiful face." },
+    { en: "facility", am: "መገልገያ = megeligeya", nr: "duŋ la̱t", definition: "A place, amenity, or piece of equipment provided for a particular purpose.", example: "The facility offers a gym and swimming pool." },
+    { en: "fact", am: "እውነታ = iwineta", nr: "thuɔ̱k", definition: "A thing that is known or proved to be true.", example: "It is a fact that the Earth orbits the sun." },
+    { en: "factor", am: "ምክንያት = mikiniyati", nr: "min no̱ŋ duɔ̱r", definition: "A circumstance, fact, or influence that contributes to a result.", example: "Weather is a major factor in crop production." },
+    { en: "factory", am: "ፋብሪካ = fabirīka", nr: "gua̱th lätdä kuakni", definition: "A building or group of buildings where goods are manufactured.", example: "The factory produces electronics." },
+    { en: "faculty", am: "ፋኩልቲ = fakulitī", nr: "duël gɔ̱rä", definition: "The teaching staff at an educational institution.", example: "The faculty members are highly qualified." },
+    { en: "fade", am: "ደበዘዘ = debezeze", nr: "wëë kɛ thuɔ̱k, yaal", definition: "To gradually grow faint and disappear.", example: "The colors of the painting began to fade." },
+    { en: "fail", am: "አልተሳካም = ālitesakami", nr: "pɛ̱̱ɛ̱n", definition: "To be unsuccessful in achieving one's goal.", example: "He did not want to fail the exam." },
+    { en: "failure", am: "ውድቀት = widik’eti", nr: "pɛ̱̈ɛ̱̈n", definition: "Lack of success.", example: "The project was a failure due to poor planning." },
+    { en: "fair", am: "ፍትሃዊ = fitihawī", nr: "päri ŋuani", definition: "Treating people equally without favoritism.", example: "The competition was fair for everyone." },
+    { en: "gain", am: "ማግኘት = maginyeti", nr: "mi jeki", definition: "To obtain or secure something desired.", example: "She hopes to gain more experience." },
+    { en: "game", am: "ጨዋታ = ch’ewata", nr: "ŋar", definition: "A form of competitive activity or sport.", example: "We played a fun game of soccer." },
+    { en: "gang", am: "የወሮበሎች ቡድን = yewerobelochi budini", nr: "buɔ̱n", definition: "A group of people who associate with one another.", example: "The gang was known for its activities." },
+    { en: "gap", am: "ክፍተት = kifiteti", nr: "kam", definition: "A break or hole in an object or between two objects.", example: "There is a gap in the fence." },
+    { en: "garage", am: "ጋራዥ = garazhi", nr: "gua̱th la̱t thurbiɛ̱li", definition: "A building for housing a motor vehicle.", example: "I parked my car in the garage." },
+    { en: "garden", am: "የአትክልት ቦታ = ye’ātikiliti bota", nr: "kak", definition: "A plot of ground where plants are cultivated.", example: "She has a beautiful flower garden." },
+    { en: "garlic", am: "ነጭ ሽንኩርት = nech’i shinikuriti", nr: "pa̱thɔl tum", definition: "A strong-smelling pungent-tasting bulb used as a flavoring in cooking.", example: "Garlic adds flavor to many dishes." },
+    { en: "gas", am: "ጋዝ = gazi", nr: "jiɔm", definition: "A substance in a physical state that is neither solid nor liquid.", example: "The gas is used for cooking." },
+    { en: "gate", am: "በር = beri", nr: "thok kal", definition: "A barrier that can close off an entrance.", example: "Please close the gate when you leave." },
+    { en: "gather", am: "መሰብሰብ = mesebisebi", nr: "mat gua̱a̱th kɛl, ruɔ̱l", definition: "To bring together and take in from scattered places.", example: "We need to gather our supplies for the trip." },
+	{ en: "habit", am: "ልማድ = limadi", nr: "ta̱a̱ ciɛŋä", definition: "A settled or regular tendency or practice.", example: "Brushing your teeth is a good habit." },
+    { en: "habitat", am: "መኖሪያ = menorīya", nr: "ciëŋ gua̱th", definition: "The natural home or environment of an animal, plant, or other organism.", example: "The forest is a habitat for many species." },
+    { en: "hair", am: "ፀጉር = t͟s’eguri", nr: "miëm", definition: "The fine strands that grow from the skin of humans and animals.", example: "She likes to dye her hair different colors." },
+    { en: "half", am: "ግማሽ = gimashi", nr: "nuth, kui̱y kä duɔ̱r", definition: "One of two equal parts of a whole.", example: "I ate half of the pizza." },
+    { en: "hall", am: "አዳራሽ = ādarashi", nr: "duël mi diit", definition: "A large room or building for meetings or events.", example: "The hall was filled with people." },
+    { en: "hand", am: "እጅ = iji", nr: "tet", definition: "The end part of a person's arm.", example: "He raised his hand to ask a question." },
+    { en: "handle", am: "መያዣ = meyazha", nr: "ka̱p kä duɔ̱r", definition: "The part of an object designed for holding, moving, or carrying it.", example: "The handle of the door is broken." },
+    { en: "hang", am: "ማንጠልጠል = manit’elit’eli", nr: "ŋa̱p", definition: "To suspend or be suspended from above.", example: "They decided to hang the painting on the wall." },
+    { en: "happen", am: "መከሰት = mekeseti", nr: "mi ci tuɔk", definition: "To take place or occur.", example: "What will happen next?" },
+    { en: "happy", am: "ደስተኛ = desitenya", nr: "tɛɛth lɔa̱c", definition: "Feeling or showing pleasure or contentment.", example: "She was happy to see her friends." },
+    { en: "hard", am: "ከባድ = kebadi", nr: "mi bum bum", definition: "Solid, firm, and resistant to pressure; not easily broken.", example: "The rock is too hard to break." },
+    { en: "I", am: "አይ = āyi", nr: "Ɣän", definition: "The pronoun used by a speaker to refer to themselves.", example: "I love to read books." },
+    { en: "ice", am: "በረዶ = beredo", nr: "tilij", definition: "Frozen water, a brittle, transparent crystalline solid.", example: "She put ice in her drink." },
+    { en: "idea", am: "ሀሳብ = hāsabi", nr: "ca̱r, min cari", definition: "A thought or suggestion as to a possible course of action.", example: "He had a great idea for the project." },
+    { en: "ideal", am: "ተስማሚ = tesimamī", nr: "mi gɔa̱", definition: "Satisfying one's conception of what is perfect; most suitable.", example: "She is the ideal candidate for the job." },
+    { en: "identification", am: "መለየት = meleyeti", nr: "ŋiec", definition: "The action or process of identifying someone or something.", example: "You need an ID for identification." },
+    { en: "if", am: "ከሆነ = kehone", nr: "mi", definition: "Used to introduce a conditional clause.", example: "If it rains, we will stay inside." },
+    { en: "ignore", am: "ችላ በል = chila beli", nr: "mi päli ruëy", definition: "To refuse to take notice of or acknowledge.", example: "He decided to ignore the rude comments." },
+    { en: "job", am: "ሥራ = šira", nr: "la̱t", definition: "A paid position of regular employment.", example: "She is looking for a new job." },
+    { en: "join", am: "መቀላቀል = mek’elak’eli", nr: "ma̱t rɛy", definition: "To connect or fasten things together.", example: "Would you like to join us for dinner?" },
+    { en: "joint", am: "መገጣጠሚያ = meget’at’emīya", nr: "ro̱m cɔ̱wni", definition: "A place where two or more things are connected.", example: "The joint was too stiff to move." },
+    { en: "joke", am: "ቀልድ = k’elidi", nr: "ŋa̱r", definition: "A thing that someone says to cause amusement or laughter.", example: "He told a funny joke." },
+    { en: "journalist", am: "ጋዜጠኛ = gazēt’enya", nr: "ra̱̱m mi lat thuk", definition: "A person who writes for newspapers, magazines, or news websites.", example: "The journalist reported on the event." },
+    { en: "journey", am: "ጉዞ = guzo", nr: "ja̱l", definition: "An act of traveling from one place to another.", example: "The journey took several hours." },
+    { en: "joy", am: "ደስታ = desita", nr: "tɛɛth lɔa̱c", definition: "A feeling of great pleasure and happiness.", example: "The news brought her great joy." },
+    { en: "judge", am: "ዳኛ = danya", nr: "luuk, kuär luɔ̱k", definition: "A person who decides cases in a court of law.", example: "The judge ruled in favor of the plaintiff." },
+    { en: "judgment", am: "ፍርድ = firidi", nr: "luk", definition: "The ability to make considered decisions or come to sensible conclusions.", example: "His judgment was questioned." },
+    { en: "juice", am: "ጭማቂ = ch’imak’ī", nr: "athi̱r", definition: "The liquid obtained from or present in fruit or vegetables.", example: "I like to drink orange juice." },
+    { en: "jump", am: "ዝብሉ = zibilu", nr: "yor nhial, kac nhial", definition: "To push oneself off the ground and into the air by using the muscles in one's legs and feet.", example: "She can jump very high." },
+    { en: "keep", am: "ጠብቅ = t’ebik’i", nr: "mi tiɛ̱ti duɔr", definition: "To have or retain possession of something.", example: "Please keep this safe." },
+    { en: "key", am: "ቁልፍ = k’ulifi", nr: "lëëp duel", definition: "A small metal instrument used for opening or closing a lock.", example: "I lost my house key." },
+    { en: "kick", am: "ምታ = mita", nr: "kuet", definition: "To strike with the foot.", example: "He likes to kick the ball." },
+    { en: "kid", am: "ልጅ = liji", nr: "gat", definition: "A child or young person.", example: "The kid was playing in the park." },
+    { en: "kill", am: "መግደል = megideli", nr: "näk", definition: "To cause the death of a living being.", example: "They had to kill the pests." },
+    { en: "killer", am: "ገዳይ = gedayi", nr: "nääk nath", definition: "A person or thing that kills.", example: "The killer was caught by the police." },
+    { en: "kind", am: "ዓይነት = ‘ayineti", nr: "gɔy lɔa̱c", definition: "A group of people or things having similar characteristics.", example: "She is a very kind person." },
+    { en: "king", am: "ንጉሥ = niguši", nr: "kuär", definition: "The male ruler of an independent state.", example: "The king ruled the kingdom wisely." },
+    { en: "kiss", am: "መሳም = mesami", nr: "ciɛ̱m thuok", definition: "To touch with the lips as a sign of love or greeting.", example: "They shared a kiss before saying goodbye." },
+    { en: "lack", am: "አጥረት = āt’ireti", nr: "thiɛ̱l kä duɔ̱r", definition: "The state of being without or not having enough of something.", example: "There is a lack of resources." },
+    { en: "lady", am: "እመቤት = imebēti", nr: "guar nyal", definition: "A woman of superior status or a refined manner.", example: "She is a kind lady." },
+    { en: "lake", am: "ሀይቅ = hāyik’i", nr: "pul, bar", definition: "A large body of water surrounded by land.", example: "They went swimming in the lake." },
+    { en: "land", am: "መሬት = merēti", nr: "mun, pi̱ny", definition: "The part of the earth's surface that is not covered by water.", example: "They own a piece of land." },
+    { en: "landscape", am: "የመሬት አቀማመጥ = yemērēti āk’emamet’i", nr: "ta̱a̱ muɔn, ta̱a̱ pi̱ɛny", definition: "All the visible features of an area of land.", example: "The landscape is beautiful." },
+    { en: "language", am: "ቋንቋ = k’wanik’wa", nr: "tho̱k in rua̱c kɛ naath", definition: "A system of communication used by a particular community or country.", example: "English is a widely spoken language." },
+    { en: "lap", am: "ጭን = ch’ini", nr: "ɣäm", definition: "The upper legs of a seated person.", example: "The dog jumped onto my lap." },
+    { en: "large", am: "ትልቅ = tilik’i", nr: "mi diit", definition: "Of considerable size, quantity, or capacity.", example: "They have a large house." },
+    { en: "main", am: "ዋና = wana", nr: "min diit ni jɛn", definition: "Of chief importance; principal.", example: "The main road leads to the city." },
+    { en: "mainly", am: "በዋናነት = bewananeti", nr: "ɛlɔ̱ŋ", definition: "For the most part; mostly.", example: "She mainly works in marketing." },
+    { en: "maintain", am: "መጠበቅ = met’ebek’i", nr: "mi tiɛ̱ti duɔr", definition: "To keep in an existing state or preserve from failure.", example: "It's important to maintain a healthy lifestyle." },
+    { en: "maintenance", am: "ጥገና = t’igena", nr: "ria̱li kä duɔ̱r ikä", definition: "The process of maintaining or preserving something.", example: "The maintenance of the building is crucial." },
+    { en: "major", am: "ዋና = wana", nr: "min diit", definition: "Important, serious, or significant.", example: "He is a major player in the industry." },
+    { en: "majority", am: "አብዛኞቹ = ābizanyochu", nr: "nɛy ti ŋua̱n", definition: "More than half of a particular group.", example: "The majority voted in favor of the proposal." },
+    { en: "make", am: "ማድረግ = madiregi", nr: "lätni ka̱̱ duɔr", definition: "To create or form something.", example: "She loves to make crafts." },
+    { en: "maker", am: "ሰሪ = serī", nr: "ram min lät", definition: "A person or company that produces something.", example: "He is a toy maker." },
+    { en: "makeup", am: "ሜካፕ = mēkapi", nr: "ria̱li pua̱ny ikä", definition: "Cosmetics applied to the face to enhance appearance.", example: "She wore a lot of makeup for the event." },
+    { en: "male", am: "ወንድ = wenidi", nr: "wut, tuut", definition: "Of or denoting the sex that produces small, mobile gametes (sperm).", example: "He is a male student." },
+    { en: "mall", am: "የገበያ አዳራሽ = yegebeya ādarashi", nr: "duël ko̱kä ŋɔani", definition: "A large shopping area with various stores.", example: "They went to the mall to shop." },
+    { en: "man", am: "ሰው = sewi", nr: "wut", definition: "An adult human male.", example: "The man walked down the street." },
+    { en: "naked", am: "እርቃን = irik’ani", nr: "/thiɛlɛ bi̱i̱, juutdä", definition: "Not clothed or covered.", example: "The baby was naked." },
+    { en: "name", am: "ስም = simi", nr: "cio̱t", definition: "A word by which a person or thing is known.", example: "What is your name?" },
+    { en: "narrative", am: "ትረካ = tireka", nr: "lɛyni kä mi ci tuɔk", definition: "A spoken or written account of connected events; a story.", example: "The narrative was captivating." },
+    { en: "narrow", am: "ጠባብ = t’ebabi", nr: "mi ci̱wci̱w", definition: "Of small width in relation to length.", example: "The path was narrow and winding." },
+    { en: "nation", am: "ብሔር = biḥēri", nr: "do̱o̱r, wec", definition: "A large body of people united by common descent, history, culture, or language.", example: "The nation celebrated its independence." },
+    { en: "national", am: "ብሔራዊ = biḥērawī", nr: "duŋ we̱̱c", definition: "Relating to a nation; common to or characteristic of a whole nation.", example: "National holidays are celebrated." },
+    { en: "native", am: "ተወላጅ = tewelaji", nr: "diäl, ran dhɔar", definition: "A person born in a specified place or associated with a place by birth.", example: "He is a native of the city." },
+     { en: "natural", am: "ተፈጥሯዊ = tefet’irwawī", nr: "mi cak kuoth", definition: "Existing in or caused by nature; not made or caused by humankind.", example: "Natural beauty is often admired." },
+    { en: "nature", am: "ተፈጥሮ = tefet’iro", nr: "mi cak kuoth", definition: "The phenomena of the physical world collectively, including plants, animals, the landscape, and other features and products of the earth.", example: "Nature is vital for our survival." },
+    { en: "near", am: "ቅርብ = k’iribi", nr: "thiëkä", definition: "At or to a short distance away from a place.", example: "The store is near my house." },
+    { en: "object", am: "ነገር = negeri", nr: "duɔ̱̱r", definition: "A material thing that can be perceived by the senses.", example: "The object on the table is a vase." },
+    { en: "objective", am: "ዓላማ = ‘alama", nr: "min go̱ri ɛn ɣöö bi la̱t", definition: "A goal or purpose that one aims to achieve.", example: "Our objective is to finish the project by Friday." },
+    { en: "obligation", am: "ግዴታ = gidēta", nr: "min de̱ri la̱t", definition: "An act or course of action to which a person is morally or legally bound.", example: "He felt an obligation to help his neighbor." },
+    { en: "observation", am: "ምልከታ = miliketa", nr: "mi guɛ̱ci ta̱a̱ duɔ̱rä", definition: "The action or process of observing something or someone carefully.", example: "Her observation of the stars was enlightening." },
+    { en: "obtain", am: "ማግኘት = maginyeti", nr: "mi jëki, mi ka̱̱ni", definition: "To get, acquire, or secure something.", example: "You can obtain a copy of the report online." },
+    { en: "obvious", am: "ግልጽ = gilits’i", nr: "mi ŋa̱ckɛ ", definition: "Easily perceived or understood; clear, self-evident.", example: "It was obvious that she was happy." },
+    { en: "occasion", am: "አጋጣሚ = āgat’amī", nr: "tha̱ŋ gua̱̱thni", definition: "A particular time or instance of an event.", example: "On this occasion, we celebrate our achievements." },
+    { en: "pace", am: "ፍጥነት = fit’ineti", nr: "ka̱a̱th", definition: "The speed at which someone or something moves or does something.", example: "He set a brisk pace for the walk." },
+    { en: "pack", am: "ማሸግ = mashegi", nr: "läth rɛy kä duɔ̱r", definition: "To fill a suitcase or bag with clothes and other items needed for a trip.", example: "She needs to pack her bags for the trip." },
+    { en: "package", am: "ጥቅል = t’ik’ili", nr: "ti ca riɛ̱th rɛy warɛga̱kä", definition: "An object or group of objects wrapped in paper or other material.", example: "The package arrived this morning." },
+    { en: "page", am: "ገጽ = gets’i", nr: "wargak, pec", definition: "One side of a sheet of paper in a book, magazine, or newspaper.", example: "Turn to the next page." },
+    { en: "pain", am: "ህመም = himemi", nr: "mi bɛ̱c", definition: "Physical suffering or discomfort caused by illness or injury.", example: "He felt a sharp pain in his back." },
+    { en: "paint", am: "ቀለም = k’elemi", nr: "bilä", definition: "A colored substance that is spread over a surface to dry and form a film.", example: "She used blue paint for the sky." },
+    { en: "painter", am: "ሰዓሊ = se‘alī", nr: "pɛntɛr", definition: "A person who paints as a profession or hobby.", example: "The painter created a beautiful landscape." },
+    { en: "painting", am: "መቀባት = mek’ebati", nr: "mi bili duɔ̱r", definition: "The action or skill of using paint to create a picture.", example: "Her painting was displayed in the gallery." },
+    { en: "pair", am: "ጥንድ = t’inidi", nr: "rɛw kɛl", definition: "A set of two things used together.", example: "I bought a pair of shoes." },
+    { en: "qualify", am: "ብቁ መሆን = bik’u mehoni", nr: "mi ro̱ŋ thin", definition: "To meet the necessary standards or requirements.", example: "You need to qualify for the scholarship." },
+    { en: "quality", am: "ጥራት = t’irati", nr: "gɔy kä duɔ̱r", definition: "The standard of something as measured against other things of a similar kind.", example: "The quality of the product was excellent." },
+    { en: "question", am: "ጥያቄ = t’iyak’ē", nr: "thiec", definition: "A sentence worded or expressed so as to elicit information.", example: "Do you have a question?" },
+    { en: "quick", am: "ፈጣን = fet’ani", nr: "kɛ pɛ̱ɛ̱th", definition: "Moving fast or doing something in a short time.", example: "She took a quick shower." },
+    { en: "quickly", am: "በፍጥነት = befit’ineti", nr: "kɛ pɛ̱ɛ̱th", definition: "In a quick manner; rapidly.", example: "He finished the test quickly." },
+    { en: "quiet", am: "ጸጥታ = ts’et’ita", nr: "biɛ̱t", definition: "Making little or no noise.", example: "Please be quiet during the movie." },
+    { en: "quietly", am: "በጸጥታ = bets’et’ita", nr: "kɛ biɛt", definition: "In a quiet manner; softly.", example: "She spoke quietly so as not to disturb anyone." },
+    { en: "quit", am: "ማቆም = mak’omi", nr: "mi päli duɔr", definition: "To leave a place, or to cease doing something.", example: "He decided to quit his job." },
+    { en: "race", am: "ዘር = zeri", nr: "döör", definition: "A group of people identified by shared physical or social qualities.", example: "The race for the championship is heating up." },
+    { en: "rain", am: "ዝናብ = zinabi", nr: "nhiaal in la dɛm", definition: "Water that falls in drops from clouds in the sky.", example: "The rain stopped just in time." },
+    { en: "raise", am: "ከፍ ማድረግ = kefi madiregi", nr: "kap nhial", definition: "To lift or move to a higher position.", example: "They will raise the flag." },
+    { en: "range", am: "ክልል = kilili", nr: "kämä kä", definition: "The area of variation between upper and lower limits on a particular scale.", example: "The temperature range is quite broad." },
+    { en: "rank", am: "ደረጃ = dereja", nr: "gua̱th in ci jek", definition: "A position in the hierarchy of an organization or society.", example: "He holds a high rank in the company." },
+    { en: "rapid", am: "ፈጣን = fet’ani", nr: "kɛ pɛth", definition: "Happening in a short time or at a fast pace.", example: "The rapid growth of technology is impressive." },
+    { en: "sacred", am: "የተቀደሰ = yetek’edese", nr: "mi thiëk kɛ kuoth", definition: "Regarded with great respect and reverence by a particular religion, group, or individual.", example: "The site is considered sacred." },
+    { en: "sad", am: "መከፋት = mekefati", nr: "jiäk lɔac", definition: "Feeling or showing sorrow; unhappy.", example: "She felt sad after hearing the news." },
+    { en: "safe", am: "አስተማማኝ = āsitemamanyi", nr: "mi /thiɛl riɛk, duŋ ma̱lä", definition: "Protected from or not exposed to danger or risk.", example: "It's safe to walk here at night." },
+    { en: "sake", am: "ምክንያት = mikiniyati", nr: "kɛ kui̱", definition: "The benefit or purpose of something.", example: "For the sake of clarity, let's summarize." },
+    { en: "salary", am: "ደሞዝ = demozi", nr: "yio̱w la̱t", definition: "A fixed regular payment, typically paid on a monthly basis, made by an employer to an employee.", example: "He received a salary increase." },
+    { en: "sale", am: "ሽያጭ = shiyach’i", nr: "ko̱k", definition: "The exchange of a commodity for money; the action of selling something.", example: "The sale ends this weekend." },
+    { en: "table", am: "ጠረጴዛ = t’erep’ēza", nr: "tha̱rbët", definition: "A piece of furniture with a flat top and one or more legs.", example: "We gathered around the table for dinner." },
+    { en: "tactic", am: "ዘዴ = zedē", nr: "ca̱p la̱t", definition: "An action or strategy carefully planned to achieve a specific end.", example: "They employed several tactics to win the game." },
+    { en: "tail", am: "ጅራት = jirati", nr: "juäl", definition: "The rear part of an animal's body, especially when elongated and flexible.", example: "The dog wagged its tail." },
+    { en: "take", am: "ውሰድ = wisedi", nr: "naŋɛ", definition: "To grasp or seize something.", example: "Please take a seat." },
+    { en: "tale", am: "ተረት = tereti", nr: "leet, ruaac ni", definition: "A narrative that relates the details of an act, occurrence, or course of events.", example: "He told a fascinating tale." },
+    { en: "talent", am: "ተሰጥኦ = teset’i’o", nr: "ŋa̱c ŋuani", definition: "Natural aptitude or skill.", example: "She has a talent for music." },
+    { en: "talk", am: "ማውራት = mawirati", nr: "ruac", definition: "To speak in order to give information or express ideas or feelings.", example: "Let's talk about your plans." },
+    { en: "tall", am: "ረጅም = rejimi", nr: "mi bär", definition: "Of great or more than average height.", example: "He is taller than his brother." },
+    { en: "tap", am: "መታ ያድርጉ = meta yadirigu", nr: "mi tuanyi kiɛ nhiec", definition: "To strike or hit something lightly or gently.", example: "Tap the screen to continue." },
+    { en: "ugly", am: "አስቀያሚ = āsik’eyamī", nr: "jiäk puäny", definition: "Unpleasant or repulsive in appearance.", example: "The ugly building stood out in the neighborhood." },
+    { en: "ultimate", am: "የመጨረሻው = yemech’ereshawi", nr: "tuɔk kɛ jɔak", definition: "Being or happening at the end of a process; final.", example: "The ultimate goal is to succeed." },
+	
+    { en: "ultimately", am: "በመጨረሻ = bemech’eresha", nr: "kɛ jɔakdɛ", definition: "Finally; in the end.", example: "Ultimately, the decision is yours." },
+    { en: "unable", am: "አልተቻለም = ālitechalemi", nr: "mi /ci luäŋ", definition: "Not able to do something.", example: "She was unable to attend the meeting." },
+    { en: "uncle", am: "አጎቴ = āgotē", nr: "näru, guulen", definition: "The brother of one's father or mother.", example: "My uncle is visiting this weekend." },
+    { en: "under", am: "ስር = siri", nr: "pi̱ny kä duɔr", definition: "In a position below something.", example: "The cat is hiding under the table." },
+    { en: "undergo", am: "ማለፍ = malefi", nr: "wä kɛ rɛy", definition: "To experience or endure something.", example: "He will undergo surgery next week." },
+    { en: "understand", am: "መረዳት = meredati", nr: "cuop lɔac, liɛ̱ŋ", definition: "To grasp the meaning, significance, or nature of something.", example: "Do you understand the instructions?" },
+    { en: "vacation", am: "የእረፍት ጊዜ = ye’irefiti gīzē", nr: "wa̱ä lɔŋä", definition: "An extended period of leisure and recreation, especially away from home.", example: "We are going on vacation next month." },
+    { en: "valley", am: "ሸለቆ = shelek’o", nr: "kam pämni", definition: "A low area of land between hills or mountains.", example: "The valley is lush and green." },
+    { en: "valuable", am: "ዋጋ ያለው = waga yalewi", nr: "mi gɔa̱", definition: "Worth a lot of money or of great importance.", example: "This painting is extremely valuable." },
+    { en: "value", am: "ዋጋ = waga", nr: "gɔydɛ", definition: "The regard that something is held to deserve; importance or worth.", example: "The value of honesty cannot be overstated." },
+    { en: "variation", am: "ልዩነት = liyuneti", nr: "dääk", definition: "A change or difference in condition, amount, or level.", example: "There is a variation in temperature throughout the year." },
+    { en: "variety", am: "ልዩነት = liyuneti", nr: "ti go̱l ti ŋua̱n", definition: "A number of different types of things, especially ones in the same general category.", example: "The market offers a variety of fruits." },
+    { en: "various", am: "የተለያዩ = yeteleyayu", nr: "ti go̱l", definition: "Different from one another; of different kinds or sorts.", example: "They sell various types of clothing." },
+    { en: "wage", am: "ደሞዝ = demozi", nr: "yio̱w la̱t kɛ cäŋ", definition: "A fixed regular payment, typically paid on a daily or weekly basis.", example: "His wage is above the minimum standard." },
+    { en: "wait", am: "ጠብቅ = t’ebik’i", nr: "mi liɛ̱pi", definition: "To stay in a place until an expected event happens.", example: "Please wait for your turn." },
+    { en: "wake", am: "መቀስቀስ = mek’esik’esi", nr: "kër nin", definition: "To stop sleeping; to become awake.", example: "I wake up early every day." },
+    { en: "walk", am: "መራመድ = meramedi", nr: "ja̱l", definition: "To move at a regular pace by lifting and setting down each foot in turn.", example: "We like to walk in the park." },
+    { en: "wall", am: "ግድግዳ = gidigida", nr: "puɔ̱ny duël", definition: "A continuous vertical brick or stone structure that encloses or divides an area of land.", example: "The wall protects the garden." },
+    { en: "wander", am: "መንከራተት = menikerateti", nr: "mi jäli  baaŋ", definition: "To move around without a fixed course, aim, or goal.", example: "They love to wander in the city." },
+    { en: "want", am: "ይፈልጋሉ = yifeligalu", nr: "go̱r duɔ̱rä", definition: "To have a desire to possess or do something.", example: "I want to learn a new language." },
+    { en: "war", am: "ጦርነት = t’orineti", nr: "ko̱r", definition: "A state of armed conflict between different countries or different groups within a country.", example: "The war lasted for several years." },
+    { en: "warm", am: "ሞቃት = mok’ati", nr: "lëth", definition: "Of or at a fairly or comfortably high temperature.", example: "The weather is warm today." },
+    { en: "warn", am: "አስጠንቅቅ = āsit’enik’ik’i", nr: "luëk ran", definition: "To inform someone in advance of an impending or possible danger.", example: "Please warn me if you see any danger." },
+    { en: "yard", am: "ግቢ = gibī", nr: "kam dho̱ri", definition: "An area of land around a house or building.", example: "The kids are playing in the yard." },
+    { en: "yeah", am: "አዎን = āwoni", nr: "ɣɔ̱n", definition: "An informal way of saying yes.", example: "Yeah, I agree with you." },
+    { en: "year", am: "አመት = āmeti", nr: "ruɔ̱n", definition: "The time taken by the earth to make one revolution around the sun, approximately 365 days.", example: "This year has been challenging." },
+    { en: "yell", am: "መጮህ = mech’ohi", nr: "wië mi diit", definition: "To shout loudly.", example: "He had to yell to get their attention." },
+    { en: "yellow", am: "ቢጫ = bīch’a", nr: "biɛl mi yan", definition: "A color like that of ripe lemons or butter.", example: "She wore a yellow dress." },
+    { en: "yes", am: "አዎ = āwo", nr: "Äɣ", definition: "Used to give an affirmative response.", example: "Yes, I would love to go." },
+    { en: "yesterday", am: "ትናንት = tinaniti", nr: "pan", definition: "The day before today.", example: "I saw him yesterday." },
+    { en: "yet", am: "ገና = gena", nr: "ŋotdɛ", definition: "Up until the present or a specified or implied time.", example: "I haven't finished yet." },
+    { en: "yield", am: "ምርት መስጠት = miriti mesit’eti", nr: "ciɛ̱k duɔ̱rä", definition: "To produce or provide a natural product; to give way to arguments, demands, or pressure.", example: "The farm yields a good crop." },
+    { en: "you", am: "አንተ = ānite", nr: "jin", definition: "Used to refer to the person or people being addressed.", example: "You are welcome to join us." },
+	
+    { en: "young", am: "ወጣት = wet’ati", nr: "mi tɔt", definition: "Having lived or existed for a short time; not old.", example: "She is still very young." },
+    { en: "zone", am: "ዞን = zoni", nr: "dhuun, guäth", definition: "An area or region marked by some distinguishing feature.", example: "This is a no-parking zone." },
+       // Add more entries as needed...
+    ];
+
+    function displayEntries() {
+        const dictionary = document.getElementById('dictionary');
+        dictionary.innerHTML = '';
+
+        entries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.innerHTML = `
+                <h2>${entry.en} <span class="pronunciation" onclick="playAudio('${entry.pronunciation}')">🔊</span></h2>
+                <p><strong>Amharic:</strong> <span class="amharic">${entry.am}</span></p>
+                <p><strong>Nuer:</strong> <span class="nuer">${entry.nr}</span></p>
+                <p><strong>Definition:</strong> ${entry.definition}</p>
+                <p><strong>Example:</strong> ${entry.example}</p>
+            `;
+            dictionary.appendChild(entryDiv);
+        });
+    }
+
+    function filterEntries() {
+        const searchInput = document.getElementById('search').value.trim().toLowerCase();
+        const filteredEntries = entries.filter(entry =>
+            entry.en.toLowerCase().includes(searchInput) ||
+            entry.am.toLowerCase().includes(searchInput) ||
+            entry.nr.toLowerCase().includes(searchInput)
+        );
+
+        const dictionary = document.getElementById('dictionary');
+        dictionary.innerHTML = '';
+
+        filteredEntries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.innerHTML = `
+                <h2>${entry.en} <span class="pronunciation" onclick="playAudio('${entry.pronunciation}')">🔊</span></h2>
+                <p><strong>Amharic:</strong> <span class="amharic">${entry.am}</span></p>
+                <p><strong>Nuer:</strong> <span class="nuer">${entry.nr}</span></p>
+                <p><strong>Definition:</strong> ${entry.definition}</p>
+                <p><strong>Example:</strong> ${entry.example}</p>
+            `;
+            dictionary.appendChild(entryDiv);
+        });
+    }
+
+    function playAudio(src) {
+        const audio = new Audio(src);
+        audio.play();
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+    }
+
+    // Initial display
+    displayEntries();
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuer Translation Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(186, 201, 196);
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #3105f7;
+            margin-bottom: 20px;
+        }
+        .quiz-container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(231, 234, 236, 0.918);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .question {
+            margin: 20px 0;
+            font-size: 1.3em;
+            color: #0c0101;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin: 15px 0;
+            background: #84cf9d;
+            border-radius: 5px;
+            padding: 10px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .options li:hover {
+            background: #66f1bc;
+            transform: scale(1.003);
+        }
+        input[type="radio"] {
+            display: none; /* Hide the default radio */
+        }
+        .custom-radio {
+            position: relative;
+            padding-left: 30px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .custom-radio:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #007BFF;
+            border-radius: 50%;
+            background: white;
+            transition: background 0.3s;
+        }
+        input[type="radio"]:checked + .custom-radio:before {
+            background: #007BFF; /* Bright blue when checked */
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        .result {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: hsl(357, 96%, 39%);
+            font-weight: bold;
+        }
+        .retry {
+            margin-top: 20px;
+            display: none;
+            background: hsl(268, 73%, 53%);
+        }
+        .retry:hover {
+            background: hsl(234, 63%, 46%);
+        }
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #D9534F;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+        .back-button:hover {
+            background: red;
+        }
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 15px;
+            }
+            .question {
+                font-size: 1.2em;
+				font-weight: bold;
+            }
+            button {
+                padding: 12px;
+                font-size: 1em;
+            }
+            .options li {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <a href="body-part.html" class="back-button">Back</a>
+<h2>Body Parts Quiz</h2>
+<h3>kuany ni min gɔaa ni Jɛn</h3>
+    <div class="quiz-container">
+        
+        <div id="quiz"></div>
+        <button id="submit">Submit Answers</button>
+        <div class="result" id="result"></div>
+        <button class="retry" id="retry">Try Again</button>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Head",
+                options: [
+                    "Wi̱c",
+                    "ŋi̱ɛth",
+                    "thok"
+                ],
+                answer: "Wi̱c"
+            },
+            {
+                question: "Brain",
+                options: [
+                    "ŋi̱ɛth",
+                    "tet",
+                    "Thok"
+                ],
+                answer: "ŋi̱ɛth"
+            },
+            {
+                question: "yat",
+                options: [
+                    "Finger",
+                    "Hair",
+                    "Nose"
+                ],
+                answer: "Finger"
+            },
+            {
+                question: "Hair",
+                options: [
+                    "Miëm",
+                    "Nhiam",
+                    "ruok"
+                ],
+                answer: "Miëm"
+            },
+            {
+                question: "Forehead",
+                options: [
+                    "nhiam kaan",
+                    "Wum",
+                    "thok"
+                ],
+                answer: "nhiam kaan"
+            },
+            {
+                question: "Nhiam",
+                options: [
+                    "Face",
+                    "Eye",
+                    "Mouth"
+                ],
+                answer: "Face"
+            },
+            {
+                question: "Eye",
+                options: [
+                    "Waŋ",
+                    "wum",
+                    "Jio̱m"
+                ],
+                answer: "Waŋ"
+            },
+            {
+                question: "hand",
+                options: [
+                    "tet",
+                    "Jiith",
+                    "Lɛ̱t"
+                ],
+                answer: "tet"
+            },
+            {
+                question: "mouth",
+               options: [
+                    "Thok",
+                    "Nhiam",
+                    "jith"
+                ],
+                answer: "Thok"
+            },
+            {
+                question: "Nose",
+                options: [
+                    "Wum",
+                    "Thok",
+                    "jith"
+                ],
+                answer: "Wum"
+            }
+        ];
+
+        function shuffleOptions(options) {
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            return options;
+        }
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+            quizData.forEach((data, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('question');
+                
+                // Shuffle options
+                const options = shuffleOptions([...data.options]);
+                
+                questionElement.innerHTML = `
+                    <p>${index + 1}. ${data.question}</p>
+                    <ul class="options">
+                        <li><input type="radio" name="question${index}" value="${options[0]}" id="q${index}a"><label class="custom-radio" for="q${index}a"> A. ${options[0]}</label></li>
+                        <li><input type="radio" name="question${index}" value="${options[1]}" id="q${index}b"><label class="custom-radio" for="q${index}b"> B. ${options[1]}</label></li>
+                        <li><input type="radio" name="question${index}" value="${options[2]}" id="q${index}c"><label class="custom-radio" for="q${index}c"> C. ${options[2]}</label></li>
+                    </ul>
+                `;
+                quizContainer.appendChild(questionElement);
+            });
+        }
+
+        document.getElementById('submit').addEventListener('click', () => {
+            let score = 0;
+            let outputHtml = '';
+            quizData.forEach((data, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selectedOption) {
+                    if (selectedOption.value === data.answer) {
+                        score++;
+                        outputHtml += `<p class="correct">${index + 1}. Correct: ${data.answer}</p>`;
+                    } else {
+                        outputHtml += `<p class="incorrect">${index + 1}. Incorrect: ${selectedOption.value}. Correct answer: ${data.answer}</p>`;
+                    }
+                } else {
+                    outputHtml += `<p class="incorrect">${index + 1}. No answer selected. Correct answer: ${data.answer}</p>`;
+                }
+            });
+            document.getElementById('result').innerHTML = `Your score: ${score} out of ${quizData.length}<br>${outputHtml}`;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('retry').style.display = 'block';
+        });
+
+        document.getElementById('retry').addEventListener('click', () => {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('retry').style.display = 'none';
+            loadQuiz();
+        });
+
+        loadQuiz();
+    </script>
+</body>
+</html>
